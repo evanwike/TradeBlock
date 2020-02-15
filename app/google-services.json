@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "868854829611",
+    "firebase_url": "https://tradeblock-f2d0d.firebaseio.com",
+    "project_id": "tradeblock-f2d0d",
+    "storage_bucket": "tradeblock-f2d0d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868854829611:android:7ed3694d5f31951a18d06e",
+        "android_client_info": {
+          "package_name": "com.example.tradeblock"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "868854829611-3n0cs2uqp5h5mjlpj2mjg7ph1bdphhjg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tradeblock",
+            "certificate_hash": "a2cd6064605d95d50e71544b4580b2af1cf23a39"
+          }
+        },
+        {
+          "client_id": "868854829611-1pjdfpe9dce2ijnp0ohe9mo0uk6mtucj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tradeblock",
+            "certificate_hash": "aefe408a994cc8eba414d82f4b644b2dbe149efd"
+          }
+        },
+        {
+          "client_id": "868854829611-e1cb40klaift8ja8mpcvf7sb6d9h6251.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9KE74D0q3g2kfCwAfMajMLJ_u8nShYBo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "868854829611-e1cb40klaift8ja8mpcvf7sb6d9h6251.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
