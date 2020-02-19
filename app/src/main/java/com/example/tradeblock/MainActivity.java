@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 0;
+    private static final String TAG = "MainActivity";
 
     Button btnRegister;
 
@@ -23,22 +24,25 @@ public class MainActivity extends AppCompatActivity {
         checkCurrentUser();
 
         btnRegister = findViewById(R.id.btn_register);
-
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-                startActivityForResult(intent, RC_SIGN_IN);
+                register();
             }
         });
     }
 
-    public void checkCurrentUser() {
+    private void register() {
+        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+        startActivityForResult(intent, RC_SIGN_IN);
+    }
+
+    private void checkCurrentUser() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user != null) {
             // User already signed in
-            Log.i("action", "User already logged in.");
+            Log.i(TAG, "User already logged in.");
 
             String name = user.getDisplayName();
             String email = user.getEmail();
@@ -46,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
             // TODO: Main entry point
         } else {
-            Log.i("action", "User not logged in.");
+            Log.i(TAG, "User not logged in.");
         }
     }
 
@@ -57,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
                 // Successful registration
-                Log.i("action", "Successful registration.");
+                Log.i(TAG, "Successful registration.");
                 // TODO: Sign-in user
                 this.finish();
             }
