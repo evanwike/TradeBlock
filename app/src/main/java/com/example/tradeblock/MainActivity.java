@@ -12,7 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int REQUEST_REGISTER = 0;
+    private static final int RC_SIGN_IN = 0;
 
     Button btn_register;
 
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-                startActivityForResult(intent, REQUEST_REGISTER);
+                startActivityForResult(intent, RC_SIGN_IN);
             }
         });
     }
@@ -37,14 +37,27 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user != null) {
-            // TODO: User signed in, go to base page
+            // User already signed in
+            Log.i("action", "User already logged in.");
+            // TODO: Main entry point
             String name = user.getDisplayName();
             String email = user.getEmail();
             Uri photoUrl = user.getPhotoUrl();
         } else {
             Log.i("action", "User not logged in.");
-//            Intent intent = new Intent(this, LoginActivity.class);
-//            startActivity(intent);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) {
+                // Successful register
+                // TODO: Sign-in user
+                this.finish();
+            }
         }
     }
 }
