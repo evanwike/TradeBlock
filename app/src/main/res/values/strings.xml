@@ -2,5 +2,11 @@
     <string name="app_name">TradeBlock</string>
 
     <string name="btn_login">Login</string>
-    <string name="btn_create_account">Create Account</string>
+    <string name="btn_create_account">Don\'t have an account?</string>
+
+    <string name="txt_login_title"><u>Login</u></string>
+
+    <string name="txt_register_title">Register</string>
+    <string name="display_name_hint">Display Name</string>
+    <string name="btn_register">Create Account</string>
 </resources>
