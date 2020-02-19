@@ -1,42 +1,39 @@
 package com.example.tradeblock;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.example.tradeblock.databinding.ActivityRegisterBinding;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
-
     public boolean validDisplay, validEmail, validPassword;
 
-    EditText editDisplay, editEmail, editPassword;
     Button btnRegister;
     FirebaseDatabase db;
     DatabaseReference ref;
+    UserModel user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        ActivityRegisterBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_register);
+        user = new UserModel();
+        binding.setUser(user);
+
         validDisplay = false;
         validEmail = false;
         validPassword = false;
 
-        editDisplay = findViewById(R.id.edit_register_display);
-        editEmail = findViewById(R.id.edit_register_email);
-        editPassword = findViewById(R.id.edit_register_password);
         btnRegister = findViewById(R.id.btn_register);
 
         db = FirebaseDatabase.getInstance();
@@ -52,28 +49,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void register() {
         // TODO: Attempt to register user
-    }
-
-    public void validateDisplayName() {
-        // TODO: Validate display name
-        final String displayName = editDisplay.getText().toString();
-
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.hasChild(displayName)) {
-                    // Username taken
-                    Log.e(TAG, "Username taken.");
-                } else {
-                    validDisplay = true;
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.w(TAG, databaseError.toException());
-            }
-        });
     }
 
     private boolean validateEmail() {
