@@ -25,7 +25,6 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-
         ActivityRegisterBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_register);
         user = new UserModel();
         binding.setUser(user);
@@ -52,5 +51,11 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void register(View view) {
         // TODO: Register user
+    }
+
+    public void back(View view) {
+        Log.i(TAG,"Registration canceled.");
+        setResult(RESULT_CANCELED);
+        finish();
     }
 }

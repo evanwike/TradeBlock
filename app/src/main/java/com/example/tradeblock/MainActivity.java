@@ -12,7 +12,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int RC_SIGN_IN = 0;
+    public static final int RC_REGISTER = 1;
+    public static final int RC_SIGN_IN = 2;
     private static final String TAG = "MainActivity";
 
     Button btnRegister;
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void register() {
         Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-        startActivityForResult(intent, RC_SIGN_IN);
+        startActivityForResult(intent, RC_REGISTER);
     }
 
     private void checkCurrentUser() {
@@ -58,12 +59,21 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == RC_REGISTER) {
             if (resultCode == RESULT_OK) {
                 // Successful registration
                 Log.i(TAG, "Successful registration.");
                 // TODO: Sign-in user
                 this.finish();
+            } else if (resultCode == RESULT_CANCELED) {
+                Log.i(TAG,"Registration activity finished.");
+            }
+        } else if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) {
+                // Successful login
+                Log.i(TAG, "Successful login.");
+            } else {
+                // TODO: Implement login failure
             }
         }
     }
