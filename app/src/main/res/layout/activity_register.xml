@@ -13,8 +13,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".RegisterActivity"
-        android:padding="24dp">
+        tools:context=".RegisterActivity">
 
         <ScrollView
             android:layout_width="match_parent"
@@ -25,55 +24,82 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/txt_register_title"
+                    style="@style/Base.Widget.MaterialComponents.TextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/txt_register_title"
-                    android:layout_marginBottom="8dp"
                     android:fontFamily="@font/contrail_one"
+                    android:text="@string/txt_register_title"
                     android:textAlignment="center"
                     android:textAppearance="@style/TextAppearance.AppCompat.Display2"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
 
-                <EditText
-                    android:id="@+id/edit_register_display"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/register_displayNameTextField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="textPersonName"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:hint="@string/display_name_hint"
-                    android:text="@{user.displayName}"
-                    android:layout_marginBottom="8dp"/>
+                    app:errorEnabled="true">
 
-                <EditText
-                    android:id="@+id/edit_register_email"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@{user.displayName}"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/register_emailTextField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="textEmailAddress"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:hint="@string/fui_email_hint"
-                    android:text="@{user.email}"
-                    android:layout_marginBottom="8dp"/>
+                    app:errorEnabled="true"
+                    android:inputType="textEmailAddress">
 
-                <EditText
-                    android:id="@+id/edit_register_password"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@{user.email}"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/passwordTextField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="textPassword"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:hint="@string/fui_password_hint"
-                    android:text="@{user.password}"
-                    android:layout_marginBottom="8dp"/>
+                    app:errorEnabled="true"
+                    android:inputType="textPassword">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@{user.password}"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <Button
-                    android:id="@+id/btn_register"
+                    android:id="@+id/register_btnRegister"
+                    style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/btn_register"
-                    android:onClick="register"/>
+                    android:onClick="register"
+                    android:text="@string/btn_register" />
+
+                <Button
+                    android:id="@+id/register_btnCancel"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="back"
+                    android:text="@string/btn_cancel" />
             </LinearLayout>
         </ScrollView>
     </RelativeLayout>

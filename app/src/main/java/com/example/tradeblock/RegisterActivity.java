@@ -4,13 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.example.tradeblock.databinding.ActivityRegisterBinding;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import static com.example.tradeblock.MainActivity.RC_CANCEL;
 
 public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
@@ -25,7 +25,6 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-
         ActivityRegisterBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_register);
         user = new UserModel();
         binding.setUser(user);
@@ -52,5 +51,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void register(View view) {
         // TODO: Register user
+    }
+
+    public void back(View view) {
+        finishActivity(RC_CANCEL);
     }
 }

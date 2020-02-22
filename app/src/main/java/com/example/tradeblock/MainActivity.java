@@ -12,7 +12,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int RC_SIGN_IN = 0;
+    public static final int RC_CANCEL = 0;
+    public static final int RC_SIGN_IN = 1;
     private static final String TAG = "MainActivity";
 
     Button btnRegister;
