@@ -4,13 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.example.tradeblock.databinding.ActivityRegisterBinding;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import static com.example.tradeblock.MainActivity.RC_CANCEL;
 
 public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
@@ -54,6 +54,8 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void back(View view) {
-        finishActivity(RC_CANCEL);
+        Log.i(TAG,"Registration canceled.");
+        setResult(RESULT_CANCELED);
+        finish();
     }
 }
