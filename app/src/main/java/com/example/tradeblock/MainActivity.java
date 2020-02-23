@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (user != null) {
             // User already signed in
-            Log.i(TAG, "User already logged in.");
+            Log.d(TAG, "User already logged in.");
 
             String name = user.getDisplayName();
             String email = user.getEmail();
@@ -51,27 +51,27 @@ public class MainActivity extends AppCompatActivity {
 
             // TODO: Main entry point
         } else {
-            Log.i(TAG, "User not logged in.");
+            Log.d(TAG, "User not logged in.");
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        // TODO: Consider refactoring this, log in user from registration activity
         if (requestCode == RC_REGISTER) {
             if (resultCode == RESULT_OK) {
                 // Successful registration
-                Log.i(TAG, "Successful registration.");
+                Log.d(TAG, "Successful registration.");
                 // TODO: Sign-in user
-                this.finish();
+//                this.finish();
             } else if (resultCode == RESULT_CANCELED) {
-                Log.i(TAG,"Registration activity finished.");
+                Log.d(TAG,"Registration activity finished.");
             }
         } else if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
                 // Successful login
-                Log.i(TAG, "Successful login.");
+                Log.d(TAG, "Successful login.");
             } else {
                 // TODO: Implement login failure
             }
