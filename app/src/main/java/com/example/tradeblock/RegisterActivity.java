@@ -2,21 +2,18 @@ package com.example.tradeblock;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.tradeblock.databinding.ActivityRegisterBinding;
 import com.firebase.ui.auth.util.ui.fieldvalidators.EmailFieldValidator;
 import com.firebase.ui.auth.util.ui.fieldvalidators.PasswordFieldValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -25,7 +22,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -66,29 +62,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         emailFieldValidator = new EmailFieldValidator(emailLayout);
         passwordFieldValidator = new PasswordFieldValidator(passwordLayout, 8);
-
-        emailLayoutText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                validateEmail(s.toString());
-            }
-        });
-        passwordLayoutText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                validatePassword(s.toString());
-            }
-        });
     }
 
     private String getDisplayNameText() { return displayNameLayoutText.getText().toString().trim(); }
@@ -108,6 +81,11 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void register(View v) {
+        // Hide keyboard and clear focus
+        hideKeyboard(v);
+        View focus = getCurrentFocus();
+        if (focus != null) focus.clearFocus();
+
         progressBar.setVisibility(View.VISIBLE);
 
         String displayName = getDisplayNameText();
@@ -133,10 +111,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                             // TODO: Send to logged in page
                             // Do I even need any of this?
-                            FirebaseUser user = auth.getCurrentUser();
-                            Intent result = new Intent();
-                            result.putExtra("user", user);
-                            setResult(RESULT_OK, result);
+                            setResult(RESULT_OK);
                             finish();
                         } else {
                             Log.w(TAG,"createUserWithEmail:failure", task.getException());
@@ -155,6 +130,11 @@ public class RegisterActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void hideKeyboard(View v) {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
     public void back(View view) {

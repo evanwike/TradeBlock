@@ -4,12 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-        <variable
-            name="user"
-            type="com.example.tradeblock.UserModel" />
-    </data>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -29,65 +23,59 @@
 
                 <TextView
                     android:id="@+id/txt_register_title"
-                    style="@style/Base.Widget.MaterialComponents.TextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/contrail_one"
-                    android:text="@string/txt_register_title"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Display2"
-                    android:textStyle="bold" />
+                    style="@style/ActivityTile"
+                    android:text="@string/txt_register_title" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/register_displayNameTextField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    style="@style/OutlinedInputLayout"
                     android:hint="@string/display_name_hint"
-                    app:errorEnabled="true">
+                    app:errorEnabled="true"
+                    app:endIconMode="clear_text">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@{user.displayName}"/>
-
+                        android:layout_height="wrap_content" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/register_emailTextField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    style="@style/OutlinedInputLayout"
                     android:hint="@string/fui_email_hint"
                     app:errorEnabled="true"
-                    android:inputType="textEmailAddress">
+                    android:inputType="textEmailAddress"
+                    app:endIconMode="clear_text">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@{user.email}"/>
-
+                        android:layout_height="wrap_content" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/register_passwordTextField"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    style="@style/OutlinedInputLayout"
                     android:hint="@string/fui_password_hint"
                     app:errorEnabled="true"
-                    android:inputType="textPassword">
+                    android:inputType="textPassword"
+                    app:counterEnabled="true"
+                    app:endIconMode="clear_text">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@{user.password}"/>
-
+                        android:layout_height="wrap_content" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Button
                     android:id="@+id/register_btnRegister"
-                    style="@style/Widget.MaterialComponents.Button"
+                    style="@style/PrimaryButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:onClick="register"
@@ -95,7 +83,7 @@
 
                 <Button
                     android:id="@+id/register_btnCancel"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    style="@style/TextButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:onClick="back"

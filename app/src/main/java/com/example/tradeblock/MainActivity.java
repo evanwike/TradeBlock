@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 // Successful registration
                 Log.d(TAG, "Successful registration.");
                 // TODO: Sign-in user
-                this.finish();
+//                this.finish();
             } else if (resultCode == RESULT_CANCELED) {
                 Log.d(TAG,"Registration activity finished.");
             }

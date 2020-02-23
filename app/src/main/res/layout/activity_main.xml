@@ -26,15 +26,12 @@
                 android:id="@+id/txt_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/contrail_one"
-                android:text="@string/app_name"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display2"
-                android:textStyle="bold" />
+                style="@style/ActivityTile"
+                android:text="@string/app_name" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/emailTextField"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/OutlinedInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/fui_email_hint"
@@ -48,12 +45,13 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/passwordTextField"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/OutlinedInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/fui_password_hint"
                 android:inputType="textPassword"
-                app:errorEnabled="true">
+                app:errorEnabled="true"
+                app:endIconMode="password_toggle">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -62,14 +60,15 @@
 
             <Button
                 android:id="@+id/btn_login"
-                style="@style/Widget.MaterialComponents.Button"
+                style="@style/PrimaryButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto"
                 android:text="@string/btn_login" />
 
             <Button
                 android:id="@+id/btn_register"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/TextButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/btn_create_account" />
