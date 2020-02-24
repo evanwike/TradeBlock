@@ -8,7 +8,7 @@
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorOnPrimary">@color/primaryTextColor</item>
         <item name="colorOnSecondary">@color/primaryColor</item>
-<!--        <item name="android:background">@color/secondaryLightColor</item>-->
+        <!-- FIXME: Overwriting action bar styling? -->
         <item name="actionBarStyle">@style/ActionBar</item>
     </style>
 
@@ -23,19 +23,12 @@
         <item name="android:fontFamily">@font/roboto</item>
     </style>
 
-    <style name="FilledInputLayout" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
-        <item name="android:textColorHint">@color/primaryTextColor</item>
-        <item name="boxBackgroundColor">@color/primaryLightColor</item>
-        <item name="hintTextColor">@color/primaryTextColor</item>
-        <item name="android:fontFamily">@font/roboto</item>
-    </style>
-
-    <style name="ActivityTile">
-        <item name="android:fontFamily">@font/contrail_one</item>
+    <style name="ActivityTitle">
+        <item name="android:fontFamily">@font/archive_regular</item>
         <item name="android:textAlignment">center</item>
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Display3</item>
         <item name="android:textColor">@color/primaryTextColor</item>
-        <item name="android:textStyle">bold</item>
+<!--        <item name="android:textStyle">bold</item>-->
     </style>
 
     <style name="PrimaryButton" parent="Widget.MaterialComponents.Button">
