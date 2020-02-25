@@ -121,7 +121,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                             try {
                                 throw Objects.requireNonNull(task.getException());
-                            } catch(FirebaseAuthUserCollisionException e) {
+                            } catch (FirebaseAuthUserCollisionException e) {
                                 Log.e(TAG, e.getMessage());
                                 emailLayout.setError(e.getMessage());
                             } catch (Exception e) {
