@@ -2,22 +2,24 @@ package com.example.tradeblock;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.tradeblock.databinding.ActivityMainBinding;
+import com.firebase.ui.auth.util.ui.fieldvalidators.EmailFieldValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,58 +27,31 @@ public class MainActivity extends AppCompatActivity {
     public static final int RC_SIGN_IN = 2;
     private static final String TAG = "MainActivity";
 
-    TextInputLayout emailLayout;
-    EditText emailText;
-    TextInputLayout passwordLayout;
-    EditText passwordText;
-    Button btnLogin;
-    Button btnRegister;
-    Button btnForgot;
+    TextInputLayout mEmailLayout;
+    EmailFieldValidator mEmailFieldValidator;
+    TextInputLayout mPasswordLayout;
+    User mUser;
 
+    @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkCurrentUser();
 
-        emailLayout = findViewById(R.id.emailTextField);
-        emailText = emailLayout.getEditText();
-        passwordLayout = findViewById(R.id.passwordTextField);
-        passwordText = passwordLayout.getEditText();
+        ActivityMainBinding binding = DataBindingUtil.setContentView(this,R.layout.activity_main);
+        mUser = new User();
+        binding.setUser(mUser);
 
-        btnLogin = findViewById(R.id.btn_login);
-        btnRegister = findViewById(R.id.btn_register);
-        btnForgot = findViewById(R.id.btn_forgot);
-
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                login();
-            }
-        });
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                register();
-            }
-        });
-        btnForgot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                forgotPassword();
-            }
-        });
+        mEmailLayout = findViewById(R.id.emailTextField);
+        mEmailFieldValidator = new EmailFieldValidator(mEmailLayout);
+        mPasswordLayout = findViewById(R.id.passwordTextField);
     }
 
-    private String getEmail() { return emailText.getText().toString().trim(); }
-    private String getPassword() { return passwordText.getText().toString().trim(); }
-
-    private void login() {
+    public void login(View v) {
         final FirebaseAuth auth = FirebaseAuth.getInstance();
-        String email = getEmail();
-        String password = getPassword();
 
-        auth.signInWithEmailAndPassword(email, password)
+        auth.signInWithEmailAndPassword(mUser.getEmail(), mUser.getPassword())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -98,14 +73,18 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void register() {
+    public void register(View v) {
         Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
         startActivityForResult(intent, RC_REGISTER);
     }
 
-    private void forgotPassword() {
+    @SuppressLint("RestrictedApi")
+    public void forgotPassword(View v) {
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        String email = getEmail();
+        String email = mUser.getEmail();
+
+        if (!mEmailFieldValidator.validate(email))
+            return;
 
         auth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -121,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                                 throw Objects.requireNonNull(task.getException());
                             } catch (Exception e) {
                                 Log.e(TAG, e.getMessage());
-                                emailLayout.setError(e.getMessage());
+                                mEmailLayout.setError(e.getMessage());
                             }
                         }
                     }

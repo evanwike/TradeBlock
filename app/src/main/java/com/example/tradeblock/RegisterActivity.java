@@ -2,6 +2,7 @@ package com.example.tradeblock;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -9,11 +10,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.tradeblock.databinding.ActivityRegisterBinding;
 import com.firebase.ui.auth.util.ui.fieldvalidators.EmailFieldValidator;
 import com.firebase.ui.auth.util.ui.fieldvalidators.PasswordFieldValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -30,16 +30,16 @@ import java.util.Objects;
 public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
 
-    Button btnRegister;
-    TextInputLayout displayNameLayout, emailLayout, passwordLayout;
-    EditText displayNameLayoutText, emailLayoutText, passwordLayoutText;
-
-    FirebaseDatabase db;
-    DatabaseReference ref;
-    FirebaseAuth auth;
-    EmailFieldValidator emailFieldValidator;
-    PasswordFieldValidator passwordFieldValidator;
-    ProgressBar progressBar;
+    TextInputLayout mDisplayNameLayout;
+    TextInputLayout mEmailLayout;
+    TextInputLayout mPasswordLayout;
+    EmailFieldValidator mEmailFieldValidator;
+    PasswordFieldValidator mPasswordFieldValidator;
+    FirebaseDatabase mDb;
+    DatabaseReference mRef;
+    FirebaseAuth mAuth;
+    ProgressBar mProgressBar;
+    User mUser;
 
     @SuppressLint("RestrictedApi")
     @Override
@@ -47,37 +47,46 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        btnRegister = findViewById(R.id.register_btnRegister);
-        displayNameLayout = findViewById(R.id.register_displayNameTextField);
-        displayNameLayoutText = displayNameLayout.getEditText();
-        emailLayout = findViewById(R.id.register_emailTextField);
-        emailLayoutText = emailLayout.getEditText();
-        passwordLayout = findViewById(R.id.register_passwordTextField);
-        passwordLayoutText = passwordLayout.getEditText();
-        progressBar = new ProgressBar(this);
+        ActivityRegisterBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_register);
+        mUser = new User();
+        binding.setUser(mUser);
 
-        db = FirebaseDatabase.getInstance();
-        ref = db.getReference("users");
-        auth = FirebaseAuth.getInstance();
+        mDisplayNameLayout = findViewById(R.id.register_displayNameTextField);
+        mEmailLayout = findViewById(R.id.register_emailTextField);
+        mPasswordLayout = findViewById(R.id.register_passwordTextField);
+        mProgressBar = new ProgressBar(this);
 
-        emailFieldValidator = new EmailFieldValidator(emailLayout);
-        passwordFieldValidator = new PasswordFieldValidator(passwordLayout, 8);
+        mDb = FirebaseDatabase.getInstance();
+        mRef = mDb.getReference("users");
+        mAuth = FirebaseAuth.getInstance();
+
+        mEmailFieldValidator = new EmailFieldValidator(mEmailLayout);
+        mPasswordFieldValidator = new PasswordFieldValidator(mPasswordLayout, 8);
     }
 
-    private String getDisplayNameText() { return displayNameLayoutText.getText().toString().trim(); }
-    private String getEmailText() { return emailLayoutText.getText().toString().trim(); }
-    private String getPasswordText() { return passwordLayoutText.getText().toString().trim(); }
+    private boolean validateUsername() {
+        String username = mUser.getUsername();
+        Log.d(TAG, String.format("Validating username: %s", username));
+        // TODO: Check user database for duplicate usernames
+        if (username.length() == 0)
+            mDisplayNameLayout.setError("Please enter a display name.");
+        return false;
+    }
 
     @SuppressLint("RestrictedApi")
-    private boolean validateEmail(String email) {
+    private boolean validateEmail() {
+        String email = mUser.getEmail();
         Log.d(TAG, String.format("Validating email: %s", email));
-        return emailFieldValidator.validate(email);
+
+        return mEmailFieldValidator.validate(email);
     }
 
     @SuppressLint("RestrictedApi")
-    private boolean validatePassword(String password) {
+    private boolean validatePassword() {
+        String password = mUser.getPassword();
         Log.d(TAG, String.format("Validating Password: %s", password));
-        return passwordFieldValidator.validate(password);
+
+        return mPasswordFieldValidator.validate(password);
     }
 
     public void register(View v) {
@@ -86,44 +95,38 @@ public class RegisterActivity extends AppCompatActivity {
         View focus = getCurrentFocus();
         if (focus != null) focus.clearFocus();
 
-        progressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.VISIBLE);
 
-        String displayName = getDisplayNameText();
-        String email = getEmailText();
-        String password = getPasswordText();
+        String username = mUser.getUsername();
+        String email = mUser.getEmail();
+        String password = mUser.getPassword();
 
-        if (!validateEmail(email)) {
+        // Cancel registration if any user attributes are invalid
+        if (!validateUsername() || !validateEmail() || !validatePassword())
             return;
-        } else if (!validatePassword(password)) {
-            return;
-        }
 
-        // TODO: Validate display name in db
-
-        auth.createUserWithEmailAndPassword(email,password)
+        mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG,"createUserWithEmail:success");
-                            progressBar.setVisibility(View.GONE);
+                            Log.d(TAG, "createUserWithEmail:success");
+                            mProgressBar.setVisibility(View.GONE);
                             Toast.makeText(RegisterActivity.this, "Success!", Toast.LENGTH_SHORT).show();
-
                             // TODO: Send to logged in page
-                            // Do I even need any of this?
                             setResult(RESULT_OK);
                             finish();
                         } else {
-                            Log.w(TAG,"createUserWithEmail:failure", task.getException());
-                            progressBar.setVisibility(View.GONE);
-                            Toast.makeText(RegisterActivity.this, "Authentication failed.",Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                            mProgressBar.setVisibility(View.GONE);
+                            Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                             // TODO: Registration failed
 
                             try {
                                 throw Objects.requireNonNull(task.getException());
                             } catch (FirebaseAuthUserCollisionException e) {
                                 Log.e(TAG, e.getMessage());
-                                emailLayout.setError(e.getMessage());
+                                mEmailLayout.setError(e.getMessage());
                             } catch (Exception e) {
                                 Log.e(TAG, e.getMessage());
                             }
@@ -133,12 +136,12 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void hideKeyboard(View v) {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
     public void back(View view) {
-        Log.d(TAG,"Registration canceled.");
+        Log.d(TAG, "Registration canceled.");
         setResult(RESULT_CANCELED);
         finish();
     }
