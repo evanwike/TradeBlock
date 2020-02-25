@@ -68,9 +68,11 @@ public class RegisterActivity extends AppCompatActivity {
         String username = mUser.getUsername();
         Log.d(TAG, String.format("Validating username: %s", username));
         // TODO: Check user database for duplicate usernames
-        if (username.length() == 0)
+        if (username.length() == 0) {
             mDisplayNameLayout.setError("Please enter a display name.");
-        return false;
+            return false;
+        }
+        return true;
     }
 
     @SuppressLint("RestrictedApi")
@@ -140,7 +142,7 @@ public class RegisterActivity extends AppCompatActivity {
         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
-    public void back(View view) {
+    public void back(View v) {
         Log.d(TAG, "Registration canceled.");
         setResult(RESULT_CANCELED);
         finish();
