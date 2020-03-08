@@ -68,6 +68,7 @@ public class RegisterActivity extends AppCompatActivity {
         String username = mUser.getUsername();
         Log.d(TAG, String.format("Validating username: %s", username));
         // TODO: Check user database for duplicate usernames
+
         if (username.length() == 0) {
             mDisplayNameLayout.setError("Please enter a display name.");
             return false;
@@ -103,7 +104,7 @@ public class RegisterActivity extends AppCompatActivity {
         String email = mUser.getEmail();
         String password = mUser.getPassword();
 
-        // Cancel registration if any user attributes are invalid
+        // Cancel registration if any input is invalid
         if (!validateUsername() || !validateEmail() || !validatePassword())
             return;
 
@@ -111,17 +112,20 @@ public class RegisterActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        mProgressBar.setVisibility(View.GONE);
+
                         if (task.isSuccessful()) {
                             Log.d(TAG, "createUserWithEmail:success");
-                            mProgressBar.setVisibility(View.GONE);
                             Toast.makeText(RegisterActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+
                             // TODO: Send to logged in page
+
                             setResult(RESULT_OK);
                             finish();
                         } else {
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            mProgressBar.setVisibility(View.GONE);
                             Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+
                             // TODO: Registration failed
 
                             try {
