@@ -6,7 +6,6 @@ import androidx.databinding.DataBindingUtil;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -19,7 +18,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
@@ -37,9 +39,16 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        checkCurrentUser();
 
-        ActivityLoginBinding binding = DataBindingUtil.setContentView(this,R.layout.activity_login);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // User already signed in, sent to Main
+        if (user != null) {
+            Log.d(TAG, "User already logged in.");
+            startMainActivity();
+        }
+
+        ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
         mUser = new User();
         binding.setUser(mUser);
 
@@ -51,8 +60,8 @@ public class LoginActivity extends AppCompatActivity {
     public void login(View v) {
         final FirebaseAuth auth = FirebaseAuth.getInstance();
 
-        String email = mUser.getEmail();
-        String password = mUser.getPassword();
+        final String email = mUser.getEmail();
+        final String password = mUser.getPassword();
 
         clearErrorMessages();
 
@@ -68,35 +77,58 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        auth.signInWithEmailAndPassword(mUser.getEmail(), mUser.getPassword())
+        auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        // Login success...
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
+                            // Send user to Main
                             Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = auth.getCurrentUser();
-                            // TODO: Send to league activity
-                        } else {
-                            // If sign in fails, display a message to the user.
+                            startMainActivity();
+                        }
+                        // Login failure...
+                        else {
+                            // Display message to user
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
 
-                            mEmailLayout.setErrorEnabled(true);
-                            mEmailLayout.setError(Objects.requireNonNull(task.getException()).getMessage());
-
-                            // TODO: Sign-in failure
+                            // Display error messages
+                            try {
+                                throw Objects.requireNonNull(task.getException());
+                            }
+                            catch (FirebaseAuthInvalidCredentialsException e) {
+                                mPasswordLayout.setErrorEnabled(true);
+                                mPasswordLayout.setError("Incorrect password.");
+                            }
+                            catch (FirebaseAuthInvalidUserException e) {
+                                mEmailLayout.setErrorEnabled(true);
+                                mEmailLayout.setError("Unregistered email address.");
+                            }
+                            catch (Exception e) {
+                                mEmailLayout.setErrorEnabled(true);
+                                mEmailLayout.setError(e.getMessage());
+                            }
                         }
                     }
                 });
     }
 
+    // Send user to Main
+    private void startMainActivity() {
+        Log.d(TAG, "Logging in user.");
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
+
+    // Send user to Register
     public void register(View v) {
         Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
         startActivityForResult(intent, RC_REGISTER);
     }
 
+    // Send password reset email
     @SuppressLint("RestrictedApi")
     public void forgotPassword(View v) {
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -109,15 +141,19 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        // Reset email successfully sent...
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Password reset email sent.");
                             Toast.makeText(LoginActivity.this, "Password reset email sent!", Toast.LENGTH_SHORT).show();
-                        } else {
+                        }
+                        // Reset email failure...
+                        else {
                             Log.d(TAG, "Password reset email failed.");
 
                             try {
                                 throw Objects.requireNonNull(task.getException());
-                            } catch (Exception e) {
+                            }
+                            catch (Exception e) {
                                 Log.e(TAG, e.getMessage());
                                 mEmailLayout.setErrorEnabled(true);
                                 mEmailLayout.setError(e.getMessage());
@@ -127,46 +163,19 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    private void checkCurrentUser() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (user != null) {
-            // User already signed in
-            Log.d(TAG, "User already logged in.");
-
-            String name = user.getDisplayName();
-            String email = user.getEmail();
-            Uri photoUrl = user.getPhotoUrl();
-
-            // TODO: Main entry point
-        } else {
-            Log.d(TAG, "User not logged in.");
-        }
-    }
-
+    // Result of user registration
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // TODO: Consider refactoring this, log in user from registration activity
-        // Registration
+
         if (requestCode == RC_REGISTER) {
+            // Registration successful -> Main
             if (resultCode == RESULT_OK) {
-                // Successful registration
                 Log.d(TAG, "Successful registration.");
-                // TODO: Sign-in user
-//                this.finish();
-            } else if (resultCode == RESULT_CANCELED) {
-                Log.d(TAG,"Registration activity finished.");
+                startMainActivity();
             }
-        }
-        // Sign-in
-        else if (requestCode == RC_SIGN_IN) {
-            if (resultCode == RESULT_OK) {
-                // Successful login
-                Log.d(TAG, "Successful login.");
-                // TODO: Send to main entry page
-            } else {
-                // TODO: Implement login failure
+            else if (resultCode == RESULT_CANCELED) {
+                Log.d(TAG, "Registration activity finished.");
             }
         }
     }

@@ -22,8 +22,8 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.util.Objects;
 
@@ -35,8 +35,6 @@ public class RegisterActivity extends AppCompatActivity {
     TextInputLayout mPasswordLayout;
     EmailFieldValidator mEmailFieldValidator;
     PasswordFieldValidator mPasswordFieldValidator;
-    FirebaseDatabase mDb;
-    DatabaseReference mRef;
     FirebaseAuth mAuth;
     ProgressBar mProgressBar;
     User mUser;
@@ -56,18 +54,16 @@ public class RegisterActivity extends AppCompatActivity {
         mPasswordLayout = findViewById(R.id.register_passwordTextField);
         mProgressBar = new ProgressBar(this);
 
-        mDb = FirebaseDatabase.getInstance();
-        mRef = mDb.getReference("users");
         mAuth = FirebaseAuth.getInstance();
 
         mEmailFieldValidator = new EmailFieldValidator(mEmailLayout);
         mPasswordFieldValidator = new PasswordFieldValidator(mPasswordLayout, 8);
     }
 
-    private boolean validateUsername() {
-        String username = mUser.getUsername();
+    private boolean validateDisplayName() {
+        String username = mUser.getDisplayName();
         Log.d(TAG, String.format("Validating username: %s", username));
-        // TODO: Check user database for duplicate usernames
+        // TODO: Check user database for duplicate display names
 
         if (username.length() == 0) {
             mDisplayNameLayout.setError("Please enter a display name.");
@@ -100,12 +96,12 @@ public class RegisterActivity extends AppCompatActivity {
 
         mProgressBar.setVisibility(View.VISIBLE);
 
-        String username = mUser.getUsername();
-        String email = mUser.getEmail();
-        String password = mUser.getPassword();
+        final String displayName = mUser.getDisplayName();
+        final String email = mUser.getEmail();
+        final String password = mUser.getPassword();
 
         // Cancel registration if any input is invalid
-        if (!validateUsername() || !validateEmail() || !validatePassword())
+        if (!validateDisplayName() || !validateEmail() || !validatePassword())
             return;
 
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -114,26 +110,46 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         mProgressBar.setVisibility(View.GONE);
 
+                        // Account creation success...
                         if (task.isSuccessful()) {
                             Log.d(TAG, "createUserWithEmail:success");
                             Toast.makeText(RegisterActivity.this, "Success!", Toast.LENGTH_SHORT).show();
 
-                            // TODO: Send to logged in page
+                            // Set display name
+                            // TODO: Set profile picture
+                            final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                            UserProfileChangeRequest updates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(displayName)
+                                    .build();
 
-                            setResult(RESULT_OK);
-                            finish();
-                        } else {
+                            // Update profile
+                            assert user != null;
+                            user.updateProfile(updates)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> update) {
+                                        if (update.isSuccessful()) {
+                                            Log.d(TAG, "Profile successfully updated.");
+                                        }
+
+                                        setResult(RESULT_OK);
+                                        finish();
+                                    }
+                                });
+                        }
+                        // Account creation failure...
+                        else {
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
 
-                            // TODO: Registration failed
-
                             try {
                                 throw Objects.requireNonNull(task.getException());
-                            } catch (FirebaseAuthUserCollisionException e) {
+                            }
+                            catch (FirebaseAuthUserCollisionException e) {
                                 Log.e(TAG, e.getMessage());
                                 mEmailLayout.setError(e.getMessage());
-                            } catch (Exception e) {
+                            }
+                            catch (Exception e) {
                                 Log.e(TAG, e.getMessage());
                             }
                         }

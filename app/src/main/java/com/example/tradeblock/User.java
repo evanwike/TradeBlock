@@ -1,18 +1,18 @@
 package com.example.tradeblock;
 
 public class User {
-    private String username;
+    private String displayName;
     private String email;
     private String password;
 
     User() {
-        this.username = "";
+        this.displayName = "";
         this.email = "";
         this.password = "";
     }
 
-    public String getUsername() {
-        return username;
+    public String getDisplayName() {
+        return displayName;
     }
 
     public String getEmail() {
@@ -23,8 +23,8 @@ public class User {
         return password;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public void setEmail(String email) {
