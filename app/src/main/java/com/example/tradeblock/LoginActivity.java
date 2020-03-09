@@ -18,6 +18,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Objects;
@@ -38,11 +40,12 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        FirebaseUser user = checkCurrentUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
+        // User already signed in, sent to Main
         if (user != null) {
-            // User already signed in, sent to Main
-            startMainActivity(user);
+            Log.d(TAG, "User already logged in.");
+            startMainActivity();
         }
 
         ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
@@ -57,8 +60,8 @@ public class LoginActivity extends AppCompatActivity {
     public void login(View v) {
         final FirebaseAuth auth = FirebaseAuth.getInstance();
 
-        String email = mUser.getEmail();
-        String password = mUser.getPassword();
+        final String email = mUser.getEmail();
+        final String password = mUser.getPassword();
 
         clearErrorMessages();
 
@@ -74,44 +77,58 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        auth.signInWithEmailAndPassword(mUser.getEmail(), mUser.getPassword())
+        auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        // Login success...
                         if (task.isSuccessful()) {
-                            // Login successful, send user to Main
+                            // Send user to Main
                             Log.d(TAG, "signInWithEmail:success");
-                            startMainActivity(auth.getCurrentUser());
-                        } else {
-                            // If sign in fails, display a message to the user.
+                            startMainActivity();
+                        }
+                        // Login failure...
+                        else {
+                            // Display message to user
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
 
-                            mEmailLayout.setErrorEnabled(true);
-                            mEmailLayout.setError(Objects.requireNonNull(task.getException()).getMessage());
-
-                            // TODO: Sign-in failure
+                            // Display error messages
+                            try {
+                                throw Objects.requireNonNull(task.getException());
+                            }
+                            catch (FirebaseAuthInvalidCredentialsException e) {
+                                mPasswordLayout.setErrorEnabled(true);
+                                mPasswordLayout.setError("Incorrect password.");
+                            }
+                            catch (FirebaseAuthInvalidUserException e) {
+                                mEmailLayout.setErrorEnabled(true);
+                                mEmailLayout.setError("Unregistered email address.");
+                            }
+                            catch (Exception e) {
+                                mEmailLayout.setErrorEnabled(true);
+                                mEmailLayout.setError(e.getMessage());
+                            }
                         }
                     }
                 });
     }
 
     // Send user to Main
-    private void startMainActivity(FirebaseUser user) {
-        Log.d(TAG, "Signing in user.");
-
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("user", user);
-        startActivity(intent);
+    private void startMainActivity() {
+        Log.d(TAG, "Logging in user.");
+        startActivity(new Intent(this, MainActivity.class));
         finish();
     }
 
+    // Send user to Register
     public void register(View v) {
         Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
         startActivityForResult(intent, RC_REGISTER);
     }
 
+    // Send password reset email
     @SuppressLint("RestrictedApi")
     public void forgotPassword(View v) {
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -124,15 +141,19 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        // Reset email successfully sent...
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Password reset email sent.");
                             Toast.makeText(LoginActivity.this, "Password reset email sent!", Toast.LENGTH_SHORT).show();
-                        } else {
+                        }
+                        // Reset email failure...
+                        else {
                             Log.d(TAG, "Password reset email failed.");
 
                             try {
                                 throw Objects.requireNonNull(task.getException());
-                            } catch (Exception e) {
+                            }
+                            catch (Exception e) {
                                 Log.e(TAG, e.getMessage());
                                 mEmailLayout.setErrorEnabled(true);
                                 mEmailLayout.setError(e.getMessage());
@@ -142,21 +163,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // Get user if already signed in
-    private FirebaseUser checkCurrentUser() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (user != null) {
-            // User already signed in
-            Log.d(TAG, "User already logged in.");
-            return user;
-        }
-
-        Log.d(TAG, "User not logged in.");
-        return null;
-    }
-
-    // Result of login and registration
+    // Result of user registration
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -165,10 +172,9 @@ public class LoginActivity extends AppCompatActivity {
             // Registration successful -> Main
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "Successful registration.");
-
-                // TODO: Make sure this is user that just registered
-                startMainActivity(FirebaseAuth.getInstance().getCurrentUser());
-            } else if (resultCode == RESULT_CANCELED) {
+                startMainActivity();
+            }
+            else if (resultCode == RESULT_CANCELED) {
                 Log.d(TAG, "Registration activity finished.");
             }
         }

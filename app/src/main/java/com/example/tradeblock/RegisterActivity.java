@@ -24,8 +24,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Objects;
 
@@ -37,8 +35,6 @@ public class RegisterActivity extends AppCompatActivity {
     TextInputLayout mPasswordLayout;
     EmailFieldValidator mEmailFieldValidator;
     PasswordFieldValidator mPasswordFieldValidator;
-    FirebaseDatabase mDb;
-    DatabaseReference mRef;
     FirebaseAuth mAuth;
     ProgressBar mProgressBar;
     User mUser;
@@ -58,8 +54,6 @@ public class RegisterActivity extends AppCompatActivity {
         mPasswordLayout = findViewById(R.id.register_passwordTextField);
         mProgressBar = new ProgressBar(this);
 
-        mDb = FirebaseDatabase.getInstance();
-        mRef = mDb.getReference("users");
         mAuth = FirebaseAuth.getInstance();
 
         mEmailFieldValidator = new EmailFieldValidator(mEmailLayout);
@@ -116,6 +110,7 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         mProgressBar.setVisibility(View.GONE);
 
+                        // Account creation success...
                         if (task.isSuccessful()) {
                             Log.d(TAG, "createUserWithEmail:success");
                             Toast.makeText(RegisterActivity.this, "Success!", Toast.LENGTH_SHORT).show();
@@ -141,18 +136,20 @@ public class RegisterActivity extends AppCompatActivity {
                                         finish();
                                     }
                                 });
-                        } else {
+                        }
+                        // Account creation failure...
+                        else {
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
 
-                            // TODO: Registration failed
-
                             try {
                                 throw Objects.requireNonNull(task.getException());
-                            } catch (FirebaseAuthUserCollisionException e) {
+                            }
+                            catch (FirebaseAuthUserCollisionException e) {
                                 Log.e(TAG, e.getMessage());
                                 mEmailLayout.setError(e.getMessage());
-                            } catch (Exception e) {
+                            }
+                            catch (Exception e) {
                                 Log.e(TAG, e.getMessage());
                             }
                         }
