@@ -6,7 +6,6 @@ import androidx.databinding.DataBindingUtil;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +19,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
@@ -37,9 +37,15 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        checkCurrentUser();
 
-        ActivityLoginBinding binding = DataBindingUtil.setContentView(this,R.layout.activity_login);
+        FirebaseUser user = checkCurrentUser();
+
+        if (user != null) {
+            // User already signed in, sent to Main
+            startMainActivity(user);
+        }
+
+        ActivityLoginBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
         mUser = new User();
         binding.setUser(mUser);
 
@@ -73,10 +79,9 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
+                            // Login successful, send user to Main
                             Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = auth.getCurrentUser();
-                            // TODO: Send to league activity
+                            startMainActivity(auth.getCurrentUser());
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -90,6 +95,16 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    // Send user to Main
+    private void startMainActivity(FirebaseUser user) {
+        Log.d(TAG, "Signing in user.");
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("user", user);
+        startActivity(intent);
+        finish();
     }
 
     public void register(View v) {
@@ -127,46 +142,34 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    private void checkCurrentUser() {
+    // Get user if already signed in
+    private FirebaseUser checkCurrentUser() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user != null) {
             // User already signed in
             Log.d(TAG, "User already logged in.");
-
-            String name = user.getDisplayName();
-            String email = user.getEmail();
-            Uri photoUrl = user.getPhotoUrl();
-
-            // TODO: Main entry point
-        } else {
-            Log.d(TAG, "User not logged in.");
+            return user;
         }
+
+        Log.d(TAG, "User not logged in.");
+        return null;
     }
 
+    // Result of login and registration
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // TODO: Consider refactoring this, log in user from registration activity
-        // Registration
+
         if (requestCode == RC_REGISTER) {
+            // Registration successful -> Main
             if (resultCode == RESULT_OK) {
-                // Successful registration
                 Log.d(TAG, "Successful registration.");
-                // TODO: Sign-in user
-//                this.finish();
+
+                // TODO: Make sure this is user that just registered
+                startMainActivity(FirebaseAuth.getInstance().getCurrentUser());
             } else if (resultCode == RESULT_CANCELED) {
-                Log.d(TAG,"Registration activity finished.");
-            }
-        }
-        // Sign-in
-        else if (requestCode == RC_SIGN_IN) {
-            if (resultCode == RESULT_OK) {
-                // Successful login
-                Log.d(TAG, "Successful login.");
-                // TODO: Send to main entry page
-            } else {
-                // TODO: Implement login failure
+                Log.d(TAG, "Registration activity finished.");
             }
         }
     }

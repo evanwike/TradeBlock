@@ -1,12 +1,13 @@
 <resources>
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorAccent">@color/primaryLightColor</item>
         <item name="colorPrimaryDark">@color/primaryDarkColor</item>
         <item name="colorOnPrimary">@color/primaryTextColor</item>
         <item name="colorOnSecondary">@color/primaryColor</item>
         <!-- FIXME: Overwriting action bar styling? -->
-        <item name="actionBarStyle">@style/ActionBar</item>
+<!--        <item name="actionBarStyle">@style/ActionBar</item>-->
     </style>
 
     <style name="ActionBar" parent="Theme.MaterialComponents.DayNight">
@@ -38,4 +39,15 @@
         <item name="android:fontFamily">@font/roboto</item>
         <item name="android:minHeight">20dip</item>
     </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

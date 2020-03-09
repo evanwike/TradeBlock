@@ -22,6 +22,8 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -64,10 +66,10 @@ public class RegisterActivity extends AppCompatActivity {
         mPasswordFieldValidator = new PasswordFieldValidator(mPasswordLayout, 8);
     }
 
-    private boolean validateUsername() {
-        String username = mUser.getUsername();
+    private boolean validateDisplayName() {
+        String username = mUser.getDisplayName();
         Log.d(TAG, String.format("Validating username: %s", username));
-        // TODO: Check user database for duplicate usernames
+        // TODO: Check user database for duplicate display names
 
         if (username.length() == 0) {
             mDisplayNameLayout.setError("Please enter a display name.");
@@ -100,12 +102,12 @@ public class RegisterActivity extends AppCompatActivity {
 
         mProgressBar.setVisibility(View.VISIBLE);
 
-        String username = mUser.getUsername();
-        String email = mUser.getEmail();
-        String password = mUser.getPassword();
+        final String displayName = mUser.getDisplayName();
+        final String email = mUser.getEmail();
+        final String password = mUser.getPassword();
 
         // Cancel registration if any input is invalid
-        if (!validateUsername() || !validateEmail() || !validatePassword())
+        if (!validateDisplayName() || !validateEmail() || !validatePassword())
             return;
 
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -118,10 +120,27 @@ public class RegisterActivity extends AppCompatActivity {
                             Log.d(TAG, "createUserWithEmail:success");
                             Toast.makeText(RegisterActivity.this, "Success!", Toast.LENGTH_SHORT).show();
 
-                            // TODO: Send to logged in page
+                            // Set display name
+                            // TODO: Set profile picture
+                            final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                            UserProfileChangeRequest updates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(displayName)
+                                    .build();
 
-                            setResult(RESULT_OK);
-                            finish();
+                            // Update profile
+                            assert user != null;
+                            user.updateProfile(updates)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> update) {
+                                        if (update.isSuccessful()) {
+                                            Log.d(TAG, "Profile successfully updated.");
+                                        }
+
+                                        setResult(RESULT_OK);
+                                        finish();
+                                    }
+                                });
                         } else {
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
