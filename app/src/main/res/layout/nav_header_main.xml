@@ -14,7 +14,9 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:contentDescription="@string/nav_header_desc"
-        app:srcCompat="@drawable/fui_ic_anonymous_white_24dp" />
+        app:srcCompat="@drawable/fui_ic_anonymous_white_24dp"
+        android:clickable="true"
+        android:focusable="true"/>
 
     <TextView
         android:id="@+id/drawerUsername"
