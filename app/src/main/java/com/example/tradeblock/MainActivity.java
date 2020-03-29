@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        
+
+        // User clicks profile image in nav drawer
         ImageView drawerImage = navigationView.getHeaderView(0).findViewById(R.id.drawerImage);
         drawerImage.setOnClickListener(new View.OnClickListener() {
             @Override
