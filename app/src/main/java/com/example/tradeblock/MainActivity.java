@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         drawerImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Clicked!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MainActivity.this, AccountDetailsActivity.class));
             }
         });
     }

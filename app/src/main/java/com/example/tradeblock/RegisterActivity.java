@@ -60,12 +60,11 @@ public class RegisterActivity extends AppCompatActivity {
         mPasswordFieldValidator = new PasswordFieldValidator(mPasswordLayout, 8);
     }
 
-    private boolean validateDisplayName() {
-        String username = mUser.getDisplayName();
-        Log.d(TAG, String.format("Validating username: %s", username));
+    private boolean validateDisplayName(String displayName) {
+        Log.d(TAG, String.format("Validating username: %s", displayName));
         // TODO: Check user database for duplicate display names
 
-        if (username.length() == 0) {
+        if (displayName.length() == 0) {
             mDisplayNameLayout.setError("Please enter a display name.");
             return false;
         }
@@ -73,16 +72,14 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     @SuppressLint("RestrictedApi")
-    private boolean validateEmail() {
-        String email = mUser.getEmail();
+    private boolean validateEmail(String email) {
         Log.d(TAG, String.format("Validating email: %s", email));
 
         return mEmailFieldValidator.validate(email);
     }
 
     @SuppressLint("RestrictedApi")
-    private boolean validatePassword() {
-        String password = mUser.getPassword();
+    private boolean validatePassword(String password) {
         Log.d(TAG, String.format("Validating Password: %s", password));
 
         return mPasswordFieldValidator.validate(password);
@@ -101,7 +98,7 @@ public class RegisterActivity extends AppCompatActivity {
         final String password = mUser.getPassword();
 
         // Cancel registration if any input is invalid
-        if (!validateDisplayName() || !validateEmail() || !validatePassword())
+        if (!validateDisplayName(displayName) || !validateEmail(email) || !validatePassword(password))
             return;
 
         mAuth.createUserWithEmailAndPassword(email, password)
