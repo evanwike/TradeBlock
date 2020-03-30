@@ -1,4 +1,4 @@
-package com.example.tradeblock;
+package com.example.tradeblock.editprofile;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +12,8 @@ import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.ImageView;
 
+import com.example.tradeblock.R;
+import com.example.tradeblock.User;
 import com.example.tradeblock.databinding.ActivityAccountDetailsBinding;
 import com.firebase.ui.auth.util.ui.fieldvalidators.EmailFieldValidator;
 import com.firebase.ui.auth.util.ui.fieldvalidators.PasswordFieldValidator;
@@ -22,7 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
-public class AccountDetailsActivity extends AppCompatActivity {
+public class EditProfileActivity extends AppCompatActivity {
     private static final String TAG = "AccountDetailsActivity";
 
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -84,10 +86,10 @@ public class AccountDetailsActivity extends AppCompatActivity {
             updates.setPhotoUri(Uri.parse(imageURL));
         }
 
-        if (!displayName.equals("") && validateDisplayName(displayName)) {
-            Log.d(TAG, "Updating display name.");
-            updates.setDisplayName(displayName);
-        }
+//        if (!displayName.equals("") && validateDisplayName(displayName)) {
+//            Log.d(TAG, "Updating display name.");
+//            updates.setDisplayName(displayName);
+//        }
 
         user.updateProfile(updates.build())
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

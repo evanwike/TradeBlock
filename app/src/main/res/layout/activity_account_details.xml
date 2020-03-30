@@ -12,7 +12,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".AccountDetailsActivity">
+        tools:context=".editprofile.EditProfileActivity">
 
         <ScrollView
             android:layout_width="match_parent"
@@ -118,7 +118,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:onClick="save"
-                    android:text="@string/account_btn_save" />
+                    android:text="@string/btn_update" />
             </LinearLayout>
         </ScrollView>
     </RelativeLayout>

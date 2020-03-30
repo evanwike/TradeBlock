@@ -30,5 +30,7 @@
     <string name="account_new_password">New Password</string>
     <string name="account_confirm_password">Confirm New Password</string>
     <string name="account_photo_uri">Image URL</string>
-    <string name="account_btn_save">Save</string>
+
+    <string name="btn_update">Update</string>
+    <string name="edit_display">Update > Display Name</string>
 </resources>

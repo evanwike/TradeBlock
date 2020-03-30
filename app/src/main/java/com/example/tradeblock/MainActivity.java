@@ -8,8 +8,8 @@ import android.view.View;
 import android.view.Menu;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.tradeblock.editprofile.EditProfileActivity;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         drawerImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, AccountDetailsActivity.class));
+                startActivity(new Intent(MainActivity.this, EditProfileActivity.class));
             }
         });
     }
