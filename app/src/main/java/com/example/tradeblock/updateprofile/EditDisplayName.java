@@ -1,4 +1,4 @@
-package com.example.tradeblock.editprofile;
+package com.example.tradeblock.updateprofile;
 
 import android.os.Bundle;
 

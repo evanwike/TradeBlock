@@ -47,6 +47,12 @@
         <item name="android:minHeight">20dip</item>
     </style>
 
+    <style name="IconButton" parent="Widget.MaterialComponents.Button.Icon">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorOnPrimary</item>
+        <item name="iconTint">@color/colorOnPrimary</item>
+    </style>
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

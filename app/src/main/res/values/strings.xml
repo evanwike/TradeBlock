@@ -31,6 +31,13 @@
     <string name="account_confirm_password">Confirm New Password</string>
     <string name="account_photo_uri">Image URL</string>
 
+    <string name="update_title">Update Profile</string>
+    <string name="btn_update_image">Profile Pic</string>
+    <string name="btn_update_display">Display Name</string>
+    <string name="btn_update_email">Email</string>
+    <string name="btn_update_password">Password</string>
+
+
     <string name="btn_update">Update</string>
     <string name="edit_display">Update > Display Name</string>
 </resources>
