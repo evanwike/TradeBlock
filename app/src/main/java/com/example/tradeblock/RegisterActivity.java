@@ -29,6 +29,7 @@ import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
+    public static final int MIN_PASSWORD_LENGTH = 8;
 
     TextInputLayout mDisplayNameLayout;
     TextInputLayout mEmailLayout;
@@ -57,7 +58,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         mEmailFieldValidator = new EmailFieldValidator(mEmailLayout);
-        mPasswordFieldValidator = new PasswordFieldValidator(mPasswordLayout, 8);
+        mPasswordFieldValidator = new PasswordFieldValidator(mPasswordLayout, MIN_PASSWORD_LENGTH);
     }
 
     private boolean validateDisplayName(String displayName) {

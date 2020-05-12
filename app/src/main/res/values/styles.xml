@@ -19,6 +19,23 @@
         <item name="hintTextColor">@color/primaryTextColor</item>
         <item name="android:textColorHint">@color/primaryTextColor</item>
         <item name="android:fontFamily">@font/roboto</item>
+        <item name="helperTextTextColor">@color/primaryTextColor</item>
+    </style>
+
+    <style name="UpdateDialogInputLayout" parent="OutlinedInputLayout">
+        <item name="endIconMode">clear_text</item>
+        <item name="endIconTint">@color/primaryTextColor</item>
+        <item name="boxStrokeColor">@color/primaryTextColor</item>
+    </style>
+
+    <style name="FilledInputLayout" parent="Widget.MaterialComponents.TextInputLayout.FilledBox">
+        <item name="boxBackgroundColor">@color/colorOnPrimary</item>
+        <item name="android:textColor">@color/primaryColor</item>
+        <item name="hintTextColor">@color/primaryColor</item>
+        <item name="endIconMode">clear_text</item>
+        <item name="endIconTint">@color/primaryColor</item>
+        <item name="android:textColorHint">@color/primaryColor</item>
+        <item name="boxStrokeColor">@color/primaryDarkColor</item>
     </style>
 
     <style name="ActivityTitle">
@@ -28,11 +45,21 @@
         <item name="android:textColor">@color/primaryTextColor</item>
     </style>
 
-    <style name="UpdateTitle">
+    <style name="UpdateDialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="backgroundColor">@color/primaryDarkColor</item>
+        <item name="android:textColor">@color/colorOnPrimary</item>
+    </style>
+
+    <style name="UpdateDialogTitle">
         <item name="fontFamily">@font/archive_regular</item>
         <item name="android:textAlignment">center</item>
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Large</item>
         <item name="android:textColor">@color/primaryTextColor</item>
+    </style>
+
+    <style name="UpdateTitle" parent="ActivityTitle">
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Medium</item>
+        <item name="android:textAlignment">viewStart</item>
     </style>
 
     <style name="PrimaryButton" parent="Widget.MaterialComponents.Button">
