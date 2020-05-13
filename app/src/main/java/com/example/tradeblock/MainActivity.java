@@ -68,8 +68,18 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        // Add listener to logout button in navigation drawer
+        MenuItem account = navigationView.getMenu().getItem(0);
         MenuItem logout = navigationView.getMenu().getItem(3);
+
+        account.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                startActivityForResult(new Intent(MainActivity.this, UpdateProfileActivity.class), RC_UPDATE);
+                return false;
+            }
+        });
+
+        // Add listener to logout button in navigation drawer
         logout.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -79,15 +89,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 finish();
                 return false;
-            }
-        });
-
-        // User clicks profile image in nav drawer
-        ImageView drawerImage = navigationView.getHeaderView(0).findViewById(R.id.drawerImage);
-        drawerImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivityForResult(new Intent(MainActivity.this, UpdateProfileActivity.class), RC_UPDATE);
             }
         });
     }

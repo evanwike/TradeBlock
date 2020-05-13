@@ -17,6 +17,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+    <string name="menu_account">Account</string>
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
@@ -49,5 +50,4 @@
     <string name="update_dialog_hint">Update Value</string>
     <string name="update_current_password_hint">Current Password</string>
     <string name="update_email_hint">Email</string>
-
 </resources>

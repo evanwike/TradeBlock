@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.URLUtil;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,11 +54,18 @@ public class UpdateProfileActivity extends AppCompatActivity {
     }
 
     private boolean validateProfilePicture(TextInputLayout layout, String url) {
-      return false;
+        Log.d(TAG, String.format("Validating image URL: %s", url));
+
+        if (!URLUtil.isValidUrl(url)) {
+            layout.setError("Please provide a valid URL.");
+            return false;
+        }
+        return true;
     }
 
     private void updateProfilePicture(String url) {
-
+        // TODO: Finish this method
+        // TODO: Allow users to set profile image from device
     }
 
     private boolean validateDisplayName(TextInputLayout layout, String displayName) {
@@ -162,7 +170,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         return passwordFieldValidator.validate(password);
     }
 
-    private void updatePassword(String password) {
+    private void updatePassword(final String password, final TextInputLayout currentPasswordLayout) {
         Log.d(TAG, "Updating password.");
         user.updatePassword(password)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -176,13 +184,37 @@ public class UpdateProfileActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, e.getMessage());
+                        if (e instanceof FirebaseAuthRecentLoginRequiredException) {
+                            Log.d(TAG, "User must be re-authenticated due to stale credentials.");
+
+                            currentPasswordLayout.setVisibility(View.VISIBLE);
+                            AuthCredential credential = EmailAuthProvider.getCredential(Objects.requireNonNull(user.getEmail()), password);
+
+                            user.reauthenticate(credential)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            Log.d(TAG, "User successfully re-authenticated.");
+                                            updatePassword(password, currentPasswordLayout);
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d(TAG, e.getLocalizedMessage());
+                                            if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                                                Toast.makeText(UpdateProfileActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                                currentPasswordLayout.setError(e.getLocalizedMessage());
+                                            }
+                                        }
+                                    });
+                        }
                     }
                 });
     }
 
     public void updateProfileImageClick(View view) {
-
+        // TODO: Handle click event
     }
 
     public void updateDisplayNameClick(View view) {
@@ -269,6 +301,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         final TextView titleView = dialog.findViewById(R.id.update_dialog_title);
         final TextInputLayout passwordLayout = dialog.findViewById(R.id.update_dialog_password);
         final TextInputLayout confirmLayout = dialog.findViewById(R.id.update_dialog_confirm_password);
+        final TextInputLayout currentPasswordLayout = dialog.findViewById(R.id.update_dialog_current_password);
 
         titleView.setText(R.string.update_dialog_title_password);
 
@@ -289,7 +322,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
 
                         if (validatePassword(passwordLayout, confirmLayout, password, confirmPassword)) {
                             Log.d(TAG, "Password successfully updated.");
-                            updatePassword(password);
+                            updatePassword(password, currentPasswordLayout);
                         }
                     }
                 })
