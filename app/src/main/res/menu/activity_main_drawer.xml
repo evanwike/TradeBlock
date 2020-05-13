@@ -6,6 +6,11 @@
     <!-- TODO: Change default fragments -->
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_account"
+            android:icon="@drawable/ic_person_pin_primary_24dp"
+            android:title="@string/menu_account"
+            />
+        <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_menu_camera"
             android:title="@string/menu_home" />

@@ -17,10 +17,37 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
+    <string name="menu_account">Account</string>
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
     <string name="menu_logout">Logout</string>
 
     <string name="home_second">Home Second</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="update_new_password_hint">New Password</string>
+    <string name="update_confirm_password_hint">Confirm New Password</string>
+    <string name="account_photo_uri">Image URL</string>
+
+    <string name="update_title">Update Profile</string>
+    <string name="btn_update_image">Profile Pic</string>
+    <string name="btn_update_display">Display Name</string>
+    <string name="btn_update_email">Email</string>
+    <string name="btn_update_password">Password</string>
+    <string name="btn_update_back">Back</string>
+
+
+    <string name="btn_update">Update</string>
+    <string name="edit_display">Update > Display Name</string>
+
+    <string name="update_dialog_title_display">Update > Display Name</string>
+    <string name="update_dialog_title_pic">Update > Profile Picture</string>
+    <string name="update_dialog_title_email">Update > Email</string>
+    <string name="update_dialog_title_password">Update > Password</string>
+    <string name="update_dialog_hint">Update Value</string>
+    <string name="update_current_password_hint">Current Password</string>
+    <string name="update_email_hint">Email</string>
 </resources>

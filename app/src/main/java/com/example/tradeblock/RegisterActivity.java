@@ -17,6 +17,7 @@ import com.example.tradeblock.databinding.ActivityRegisterBinding;
 import com.firebase.ui.auth.util.ui.fieldvalidators.EmailFieldValidator;
 import com.firebase.ui.auth.util.ui.fieldvalidators.PasswordFieldValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
@@ -25,10 +26,9 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
-import java.util.Objects;
-
 public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
+    public static final int MIN_PASSWORD_LENGTH = 8;
 
     TextInputLayout mDisplayNameLayout;
     TextInputLayout mEmailLayout;
@@ -57,15 +57,14 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         mEmailFieldValidator = new EmailFieldValidator(mEmailLayout);
-        mPasswordFieldValidator = new PasswordFieldValidator(mPasswordLayout, 8);
+        mPasswordFieldValidator = new PasswordFieldValidator(mPasswordLayout, MIN_PASSWORD_LENGTH);
     }
 
-    private boolean validateDisplayName() {
-        String username = mUser.getDisplayName();
-        Log.d(TAG, String.format("Validating username: %s", username));
+    private boolean validateDisplayName(String displayName) {
+        Log.d(TAG, String.format("Validating username: %s", displayName));
         // TODO: Check user database for duplicate display names
 
-        if (username.length() == 0) {
+        if (displayName.length() == 0) {
             mDisplayNameLayout.setError("Please enter a display name.");
             return false;
         }
@@ -73,16 +72,14 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     @SuppressLint("RestrictedApi")
-    private boolean validateEmail() {
-        String email = mUser.getEmail();
+    private boolean validateEmail(String email) {
         Log.d(TAG, String.format("Validating email: %s", email));
 
         return mEmailFieldValidator.validate(email);
     }
 
     @SuppressLint("RestrictedApi")
-    private boolean validatePassword() {
-        String password = mUser.getPassword();
+    private boolean validatePassword(String password) {
         Log.d(TAG, String.format("Validating Password: %s", password));
 
         return mPasswordFieldValidator.validate(password);
@@ -101,7 +98,7 @@ public class RegisterActivity extends AppCompatActivity {
         final String password = mUser.getPassword();
 
         // Cancel registration if any input is invalid
-        if (!validateDisplayName() || !validateEmail() || !validatePassword())
+        if (!validateDisplayName(displayName) || !validateEmail(email) || !validatePassword(password))
             return;
 
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -125,33 +122,30 @@ public class RegisterActivity extends AppCompatActivity {
                             // Update profile
                             assert user != null;
                             user.updateProfile(updates)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> update) {
-                                        if (update.isSuccessful()) {
-                                            Log.d(TAG, "Profile successfully updated.");
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> update) {
+                                            if (update.isSuccessful()) {
+                                                Log.d(TAG, "Profile successfully updated.");
+                                            }
+
+                                            setResult(RESULT_OK);
+                                            finish();
                                         }
-
-                                        setResult(RESULT_OK);
-                                        finish();
-                                    }
-                                });
+                                    });
                         }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
                         // Account creation failure...
-                        else {
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Failed to create user with email.");
 
-                            try {
-                                throw Objects.requireNonNull(task.getException());
-                            }
-                            catch (FirebaseAuthUserCollisionException e) {
-                                Log.e(TAG, e.getMessage());
-                                mEmailLayout.setError(e.getMessage());
-                            }
-                            catch (Exception e) {
-                                Log.e(TAG, e.getMessage());
-                            }
+                        if (e instanceof FirebaseAuthUserCollisionException) {
+                            mEmailLayout.setError(e.getLocalizedMessage());
+                        } else {
+                            Toast.makeText(RegisterActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
