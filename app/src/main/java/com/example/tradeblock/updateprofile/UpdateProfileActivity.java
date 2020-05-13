@@ -1,17 +1,18 @@
 package com.example.tradeblock.updateprofile;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.URLUtil;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -188,6 +189,8 @@ public class UpdateProfileActivity extends AppCompatActivity {
                             Log.d(TAG, "User must be re-authenticated due to stale credentials.");
 
                             currentPasswordLayout.setVisibility(View.VISIBLE);
+                            Toast.makeText(UpdateProfileActivity.this, "Please enter your current password to proceed.", Toast.LENGTH_SHORT).show();
+                            // TODO: Wait to get new password before getting credential - will probably have to do this with all 3
                             AuthCredential credential = EmailAuthProvider.getCredential(Objects.requireNonNull(user.getEmail()), password);
 
                             user.reauthenticate(credential)
@@ -219,115 +222,133 @@ public class UpdateProfileActivity extends AppCompatActivity {
 
     public void updateDisplayNameClick(View view) {
         LayoutInflater inflater = this.getLayoutInflater();
-        View dialog = inflater.inflate(R.layout.dialog_update_with_input_text, null);
-        final TextView titleView = dialog.findViewById(R.id.update_dialog_title);
-        final TextInputLayout displayNameLayout = dialog.findViewById(R.id.update_dialog_text_input_layout);
+        View dialogLayout = inflater.inflate(R.layout.dialog_update_with_input_text, null);
+        final TextView titleView = dialogLayout.findViewById(R.id.update_dialog_title);
+        final TextInputLayout displayNameLayout = dialogLayout.findViewById(R.id.update_dialog_text_input_layout);
+        Button cancel = dialogLayout.findViewById(R.id.update_dialog_cancel);
+        Button update = dialogLayout.findViewById(R.id.update_dialog_update);
 
         titleView.setText(R.string.update_dialog_title_display);
         displayNameLayout.setHint("Display Name");
         Objects.requireNonNull(displayNameLayout.getEditText()).setText(user.getDisplayName());
 
-        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
-                .setView(dialog)
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Log.d(TAG,"Cancelling display name update.");
-                    }
-                })
-                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String displayName = Objects.requireNonNull(displayNameLayout.getEditText()).getText().toString();
-                        Log.d(TAG,"Attempting to update display name to " + displayName);
+        final AlertDialog dialog =  new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
+                .setView(dialogLayout)
+                .create();
 
-                        if (validateDisplayName(displayNameLayout, displayName)) {
-                            updateDisplayName(displayName);
-                            updated[DISPLAY_UPDATE] = true;
-                        }
-                    }
-                })
-                .create()
-                .show();
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Cancelling display name update.");
+                dialog.dismiss();
+            }
+        });
+
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String displayName = Objects.requireNonNull(displayNameLayout.getEditText()).getText().toString();
+                Log.d(TAG,"Attempting to update display name to " + displayName);
+
+                if (validateDisplayName(displayNameLayout, displayName)) {
+                    updateDisplayName(displayName);
+                    updated[DISPLAY_UPDATE] = true;
+                }
+            }
+        });
+
+        dialog.show();
     }
 
     public void updateEmailClick(View view) {
         LayoutInflater inflater = this.getLayoutInflater();
-        View dialog = inflater.inflate(R.layout.dialog_update_email, null);
-        final TextView titleView = dialog.findViewById(R.id.update_dialog_title);
-        final TextInputLayout passwordLayout = dialog.findViewById(R.id.update_dialog_password);
-        final TextInputLayout emailLayout = dialog.findViewById(R.id.update_dialog_email);
+        View dialogLayout = inflater.inflate(R.layout.dialog_update_email, null);
+        final TextView titleView = dialogLayout.findViewById(R.id.update_dialog_title);
+        final TextInputLayout passwordLayout = dialogLayout.findViewById(R.id.update_dialog_password);
+        final TextInputLayout emailLayout = dialogLayout.findViewById(R.id.update_dialog_email);
+        Button cancel = dialogLayout.findViewById(R.id.update_dialog_cancel);
+        Button update = dialogLayout.findViewById(R.id.update_dialog_update);
 
         titleView.setText(R.string.update_dialog_title_email);
         Objects.requireNonNull(emailLayout.getEditText()).setText(user.getEmail());
 
-        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
-                .setView(dialog)
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Log.d(TAG,"Cancelling email update.");
+        final AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
+                .setView(dialogLayout)
+                .create();
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"Cancelling email update.");
+                dialog.dismiss();
+                passwordLayout.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = Objects.requireNonNull(emailLayout.getEditText()).getText().toString();
+                String password = Objects.requireNonNull(passwordLayout.getEditText()).getText().toString();
+                Log.d(TAG,"Attempting to update email to " + email);
+
+                if (validateEmail(emailLayout, email)) {
+                    Log.d(TAG, "New email successfully validated.");
+
+                    if (updateEmail(email, password, emailLayout, passwordLayout)) {
+                        Log.d(TAG, "Email successfully updated.");
+                        updated[EMAIL_UPDATE] = true;
+                    } else {
+                        Log.d(TAG, "Incorrect password.");
+                        passwordLayout.setError("Incorrect password.");
                     }
-                })
-                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                    // TODO: Change so it doesn't close dialog, maybe do same for email
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String email = Objects.requireNonNull(emailLayout.getEditText()).getText().toString();
-                        String password = Objects.requireNonNull(passwordLayout.getEditText()).getText().toString();
-                        Log.d(TAG,"Attempting to update email to " + email);
+                }
+            }
+        });
 
-                        if (validateEmail(emailLayout, email)) {
-                            Log.d(TAG, "New email successfully validated.");
-
-                            if (updateEmail(email, password, emailLayout, passwordLayout)) {
-                                Log.d(TAG, "Email successfully updated.");
-                                updated[EMAIL_UPDATE] = true;
-                            } else {
-                                Log.d(TAG, "Incorrect password.");
-                                passwordLayout.setError("Incorrect password.");
-                            }
-
-                        }
-                    }
-                })
-                .create()
-                .show();
+        dialog.show();
     }
 
     public void updatePasswordClick(View view) {
         LayoutInflater inflater = this.getLayoutInflater();
-        View dialog = inflater.inflate(R.layout.dialog_update_password, null);
-        final TextView titleView = dialog.findViewById(R.id.update_dialog_title);
-        final TextInputLayout passwordLayout = dialog.findViewById(R.id.update_dialog_password);
-        final TextInputLayout confirmLayout = dialog.findViewById(R.id.update_dialog_confirm_password);
-        final TextInputLayout currentPasswordLayout = dialog.findViewById(R.id.update_dialog_current_password);
+        View dialogLayout = inflater.inflate(R.layout.dialog_update_password, null);
+        final TextView titleView = dialogLayout.findViewById(R.id.update_dialog_title);
+        final TextInputLayout passwordLayout = dialogLayout.findViewById(R.id.update_dialog_password);
+        final TextInputLayout confirmLayout = dialogLayout.findViewById(R.id.update_dialog_confirm_password);
+        final TextInputLayout currentPasswordLayout = dialogLayout.findViewById(R.id.update_dialog_current_password);
+        Button cancel = dialogLayout.findViewById(R.id.update_dialog_cancel);
+        Button update = dialogLayout.findViewById(R.id.update_dialog_update);
 
         titleView.setText(R.string.update_dialog_title_password);
 
-        new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
-                .setView(dialog)
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Log.d(TAG,"Cancelling password update.");
-                    }
-                })
-                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String password = Objects.requireNonNull(passwordLayout.getEditText()).getText().toString();
-                        String confirmPassword = Objects.requireNonNull(passwordLayout.getEditText()).getText().toString();
-                        Log.d(TAG,"Attempting to update password.");
+        final AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
+                .setView(dialogLayout)
+                .create();
 
-                        if (validatePassword(passwordLayout, confirmLayout, password, confirmPassword)) {
-                            Log.d(TAG, "Password successfully updated.");
-                            updatePassword(password, currentPasswordLayout);
-                        }
-                    }
-                })
-                .create()
-                .show();
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"Cancelling password update.");
+                dialog.dismiss();
+                currentPasswordLayout.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String password = Objects.requireNonNull(passwordLayout.getEditText()).getText().toString();
+                String confirmPassword = Objects.requireNonNull(passwordLayout.getEditText()).getText().toString();
+                Log.d(TAG,"Attempting to update password.");
+
+                if (validatePassword(passwordLayout, confirmLayout, password, confirmPassword)) {
+                    Log.d(TAG, "Password successfully updated.");
+                    updatePassword(password, currentPasswordLayout);
+                }
+            }
+        });
+
+        dialog.show();
     }
 
     public void back(View view) {
