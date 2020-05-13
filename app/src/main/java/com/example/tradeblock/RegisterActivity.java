@@ -17,6 +17,7 @@ import com.example.tradeblock.databinding.ActivityRegisterBinding;
 import com.firebase.ui.auth.util.ui.fieldvalidators.EmailFieldValidator;
 import com.firebase.ui.auth.util.ui.fieldvalidators.PasswordFieldValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
@@ -24,8 +25,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-
-import java.util.Objects;
 
 public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
@@ -123,33 +122,30 @@ public class RegisterActivity extends AppCompatActivity {
                             // Update profile
                             assert user != null;
                             user.updateProfile(updates)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> update) {
-                                        if (update.isSuccessful()) {
-                                            Log.d(TAG, "Profile successfully updated.");
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> update) {
+                                            if (update.isSuccessful()) {
+                                                Log.d(TAG, "Profile successfully updated.");
+                                            }
+
+                                            setResult(RESULT_OK);
+                                            finish();
                                         }
-
-                                        setResult(RESULT_OK);
-                                        finish();
-                                    }
-                                });
+                                    });
                         }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
                         // Account creation failure...
-                        else {
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Failed to create user with email.");
 
-                            try {
-                                throw Objects.requireNonNull(task.getException());
-                            }
-                            catch (FirebaseAuthUserCollisionException e) {
-                                Log.e(TAG, e.getMessage());
-                                mEmailLayout.setError(e.getMessage());
-                            }
-                            catch (Exception e) {
-                                Log.e(TAG, e.getMessage());
-                            }
+                        if (e instanceof FirebaseAuthUserCollisionException) {
+                            mEmailLayout.setError(e.getLocalizedMessage());
+                        } else {
+                            Toast.makeText(RegisterActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

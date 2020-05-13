@@ -35,7 +35,8 @@
         android:layout_height="wrap_content"
         android:hint="@string/update_current_password_hint"
         app:endIconMode="password_toggle"
-        app:errorEnabled="true">
+        app:errorEnabled="true"
+        android:visibility="invisible">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"

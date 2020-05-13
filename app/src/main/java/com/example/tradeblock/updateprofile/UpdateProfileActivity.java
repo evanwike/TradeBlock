@@ -12,17 +12,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.tradeblock.R;
 import com.firebase.ui.auth.util.ui.fieldvalidators.EmailFieldValidator;
 import com.firebase.ui.auth.util.ui.fieldvalidators.PasswordFieldValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -76,10 +79,14 @@ public class UpdateProfileActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Display name successfully updated.");
-                        } else {
-                            Log.d(TAG, "Failed to update profile with new display name.");
-                            Log.d(TAG, Objects.requireNonNull(task.getException()).getMessage());
                         }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Failed to update profile with new display name.");
+                        Toast.makeText(UpdateProfileActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -92,7 +99,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         return emailFieldValidator.validate(email);
     }
 
-    private boolean updateEmail(final String email, final String password) {
+    private boolean updateEmail(final String email, final String password, final TextInputLayout emailLayout, final TextInputLayout passwordLayout) {
         Log.d(TAG, "Updating email.");
         final boolean[] success = {false};
 
@@ -103,32 +110,41 @@ public class UpdateProfileActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Email successfully updated.");
                             success[0] = true;
-                        } else {
-                            try {
-                                throw Objects.requireNonNull(task.getException());
-                            } catch (FirebaseAuthRecentLoginRequiredException e) {
-                                Log.d(TAG, "User must be re-authenticated due to stale credentials.");
-                                // TODO: Get old password
-                                AuthCredential credential = EmailAuthProvider.getCredential(Objects.requireNonNull(user.getEmail()), password);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (e instanceof FirebaseAuthRecentLoginRequiredException) {
+                            Log.d(TAG, "User must be re-authenticated due to stale credentials.");
 
-                                user.reauthenticate(credential)
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task2) {
-                                                if (task2.isSuccessful()) {
-                                                    Log.d(TAG, "User successfully re-authenticated.");
-                                                    updateEmail(email, password);
-                                                } else {
-                                                    Log.d(TAG, Objects.requireNonNull(task2.getException()).getMessage());
-                                                }
+                            passwordLayout.setVisibility(View.VISIBLE);
+                            AuthCredential credential = EmailAuthProvider.getCredential(Objects.requireNonNull(user.getEmail()), password);
+
+                            // Attempt to re-authenticate user
+                            user.reauthenticate(credential)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            Log.d(TAG, "User successfully re-authenticated.");
+                                            updateEmail(email, password, emailLayout, passwordLayout);
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                                                Toast.makeText(UpdateProfileActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                                e.printStackTrace();
+                                                success[0] = false;
                                             }
-                                        });
-                            } catch (Exception e) {
-                                Log.d(TAG, e.getMessage());
-                            }
+                                        }
+                                    });
                         }
                     }
                 });
+
         return success[0];
     }
 
@@ -155,6 +171,12 @@ public class UpdateProfileActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(TAG,"Password successfully updated.");
                         }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, e.getMessage());
                     }
                 });
     }
@@ -226,7 +248,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                         if (validateEmail(emailLayout, email)) {
                             Log.d(TAG, "New email successfully validated.");
 
-                            if (updateEmail(email, password)) {
+                            if (updateEmail(email, password, emailLayout, passwordLayout)) {
                                 Log.d(TAG, "Email successfully updated.");
                                 updated[EMAIL_UPDATE] = true;
                             } else {

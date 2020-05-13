@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.example.tradeblock.databinding.ActivityLoginBinding;
 import com.firebase.ui.auth.util.ui.fieldvalidators.EmailFieldValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
@@ -21,8 +22,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
     public static final int RC_REGISTER = 1;
@@ -87,29 +86,22 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d(TAG, "signInWithEmail:success");
                             startMainActivity();
                         }
-                        // Login failure...
-                        else {
-                            // Display message to user
-                            Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    // Login failure...
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Failed to sign user in with email.");
+                        Toast.makeText(LoginActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        mPasswordLayout.setErrorEnabled(true);
 
-                            // Display error messages
-                            try {
-                                throw Objects.requireNonNull(task.getException());
-                            }
-                            catch (FirebaseAuthInvalidCredentialsException e) {
-                                mPasswordLayout.setErrorEnabled(true);
-                                mPasswordLayout.setError("Incorrect password.");
-                            }
-                            catch (FirebaseAuthInvalidUserException e) {
-                                mEmailLayout.setErrorEnabled(true);
-                                mEmailLayout.setError("Unregistered email address.");
-                            }
-                            catch (Exception e) {
-                                mEmailLayout.setErrorEnabled(true);
-                                mEmailLayout.setError(e.getMessage());
-                            }
+                        if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                            mPasswordLayout.setError("Incorrect password.");
+                        } else if (e instanceof FirebaseAuthInvalidUserException) {
+                            mEmailLayout.setError("Unregistered email address.");
+                        } else {
+                            mEmailLayout.setError(e.getLocalizedMessage());
                         }
                     }
                 });
@@ -146,19 +138,15 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d(TAG, "Password reset email sent.");
                             Toast.makeText(LoginActivity.this, "Password reset email sent!", Toast.LENGTH_SHORT).show();
                         }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
                         // Reset email failure...
-                        else {
-                            Log.d(TAG, "Password reset email failed.");
-
-                            try {
-                                throw Objects.requireNonNull(task.getException());
-                            }
-                            catch (Exception e) {
-                                Log.e(TAG, e.getMessage());
-                                mEmailLayout.setErrorEnabled(true);
-                                mEmailLayout.setError(e.getMessage());
-                            }
-                        }
+                        Log.d(TAG, "Password reset email failed.");
+                        mEmailLayout.setErrorEnabled(true);
+                        mEmailLayout.setError(e.getLocalizedMessage());
                     }
                 });
     }
