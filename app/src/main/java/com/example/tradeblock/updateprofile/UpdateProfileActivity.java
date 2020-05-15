@@ -108,9 +108,8 @@ public class UpdateProfileActivity extends AppCompatActivity {
         return emailFieldValidator.validate(email);
     }
 
-    private boolean updateEmail(final String email, final String password, final TextInputLayout emailLayout, final TextInputLayout passwordLayout) {
+    private void updateEmail(final String email, final AlertDialog dialog, final TextInputLayout passwordLayout, final Button update) {
         Log.d(TAG, "Updating email.");
-        final boolean[] success = {false};
 
         user.updateEmail(email)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -118,43 +117,63 @@ public class UpdateProfileActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Email successfully updated.");
-                            success[0] = true;
+                            dialog.dismiss();
+                            updated[EMAIL_UPDATE] = true;
                         }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        // Get password from user, attempt to re-authenticate user and update email
                         if (e instanceof FirebaseAuthRecentLoginRequiredException) {
                             Log.d(TAG, "User must be re-authenticated due to stale credentials.");
+                            Toast.makeText(UpdateProfileActivity.this, "Please enter your password", Toast.LENGTH_SHORT).show();
 
                             passwordLayout.setVisibility(View.VISIBLE);
-                            AuthCredential credential = EmailAuthProvider.getCredential(Objects.requireNonNull(user.getEmail()), password);
+                            update.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    final String password = Objects.requireNonNull(passwordLayout.getEditText()).getText().toString();
 
-                            // Attempt to re-authenticate user
-                            user.reauthenticate(credential)
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            Log.d(TAG, "User successfully re-authenticated.");
-                                            updateEmail(email, password, emailLayout, passwordLayout);
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                                                Toast.makeText(UpdateProfileActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                                                e.printStackTrace();
-                                                success[0] = false;
-                                            }
-                                        }
-                                    });
+                                    if (validatePassword(passwordLayout, password)) {
+                                        AuthCredential credential = EmailAuthProvider.getCredential(Objects.requireNonNull(user.getEmail()), password);
+
+                                        user.reauthenticate(credential)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        Log.d(TAG, "User successfully re-authenticated.");
+                                                        user.updateEmail(email);
+                                                        dialog.dismiss();
+                                                        updated[EMAIL_UPDATE] = true;
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                                                            passwordLayout.setError("Incorrect password.");
+                                                        } else {
+                                                            Toast.makeText(UpdateProfileActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+                                                });
+                                    }
+                                }
+                            });
                         }
                     }
                 });
+    }
 
-        return success[0];
+    @SuppressLint("RestrictedApi")
+    private boolean validatePassword(TextInputLayout passwordLayout, String password) {
+        PasswordFieldValidator passwordFieldValidator = new PasswordFieldValidator(passwordLayout, 0);
+        Log.d(TAG, String.format("Validating password prior to update: %s", password));
+
+        return passwordFieldValidator.validate(password);
     }
 
     @SuppressLint("RestrictedApi")
@@ -191,6 +210,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                             currentPasswordLayout.setVisibility(View.VISIBLE);
                             Toast.makeText(UpdateProfileActivity.this, "Please enter your current password to proceed.", Toast.LENGTH_SHORT).show();
                             // TODO: Wait to get new password before getting credential - will probably have to do this with all 3
+                            // TODO: Maybe move re-authentication to click method
                             AuthCredential credential = EmailAuthProvider.getCredential(Objects.requireNonNull(user.getEmail()), password);
 
                             user.reauthenticate(credential)
@@ -267,7 +287,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         final TextInputLayout passwordLayout = dialogLayout.findViewById(R.id.update_dialog_password);
         final TextInputLayout emailLayout = dialogLayout.findViewById(R.id.update_dialog_email);
         Button cancel = dialogLayout.findViewById(R.id.update_dialog_cancel);
-        Button update = dialogLayout.findViewById(R.id.update_dialog_update);
+        final Button update = dialogLayout.findViewById(R.id.update_dialog_update);
 
         titleView.setText(R.string.update_dialog_title_email);
         Objects.requireNonNull(emailLayout.getEditText()).setText(user.getEmail());
@@ -289,19 +309,11 @@ public class UpdateProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String email = Objects.requireNonNull(emailLayout.getEditText()).getText().toString();
-                String password = Objects.requireNonNull(passwordLayout.getEditText()).getText().toString();
                 Log.d(TAG,"Attempting to update email to " + email);
 
                 if (validateEmail(emailLayout, email)) {
                     Log.d(TAG, "New email successfully validated.");
-
-                    if (updateEmail(email, password, emailLayout, passwordLayout)) {
-                        Log.d(TAG, "Email successfully updated.");
-                        updated[EMAIL_UPDATE] = true;
-                    } else {
-                        Log.d(TAG, "Incorrect password.");
-                        passwordLayout.setError("Incorrect password.");
-                    }
+                    updateEmail(email, dialog, passwordLayout, update);
                 }
             }
         });
