@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navigationView, navController);
 
         MenuItem account = navigationView.getMenu().getItem(0);
-        MenuItem logout = navigationView.getMenu().getItem(3);
+        MenuItem logout = navigationView.getMenu().getItem(4);
 
         account.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
