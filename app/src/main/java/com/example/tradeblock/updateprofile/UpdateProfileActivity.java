@@ -65,7 +65,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
     }
 
 
-    // Profile Picture
+    // Avatar
     private boolean validateAvatarUrl(TextInputLayout layout, String url) {
         Log.d(TAG, String.format("Validating image URL: %s", url));
 
