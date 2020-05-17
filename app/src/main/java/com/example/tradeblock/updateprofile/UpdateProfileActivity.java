@@ -1,22 +1,28 @@
 package com.example.tradeblock.updateprofile;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tradeblock.R;
+import com.example.tradeblock.Utils;
 import com.firebase.ui.auth.util.ui.fieldvalidators.EmailFieldValidator;
 import com.firebase.ui.auth.util.ui.fieldvalidators.PasswordFieldValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -32,16 +38,20 @@ import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Objects;
 
+import static com.example.tradeblock.MainActivity.IMAGE_SIZE_PX;
 import static com.example.tradeblock.RegisterActivity.MIN_PASSWORD_LENGTH;
 
 
 public class UpdateProfileActivity extends AppCompatActivity {
     private static final String TAG = "UpdateProfileActivity";
-    public static final int PIC_UPDATE = 0;
+    public static final int AVATAR_UPDATE = 0;
     public static final int DISPLAY_UPDATE = 1;
     public static final int EMAIL_UPDATE = 2;
+    private static final int RC_LOAD_IMAGE = 4;
     private boolean[] updated;
     private FirebaseUser user;
 
@@ -56,7 +66,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
 
 
     // Profile Picture
-    private boolean validateProfilePicture(TextInputLayout layout, String url) {
+    private boolean validateAvatarUrl(TextInputLayout layout, String url) {
         Log.d(TAG, String.format("Validating image URL: %s", url));
 
         if (!URLUtil.isValidUrl(url)) {
@@ -66,13 +76,94 @@ public class UpdateProfileActivity extends AppCompatActivity {
         return true;
     }
 
-    private void updateProfilePicture(String url) {
-        // TODO: Finish this method
-        // TODO: Allow users to set profile image from device
+    private void updateAvatar(String imageUrl, final AlertDialog dialog) {
+        UserProfileChangeRequest updates = new UserProfileChangeRequest.Builder()
+                .setPhotoUri(Uri.parse(imageUrl))
+                .build();
+
+        user.updateProfile(updates)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Avatar URL successfully updated.");
+                            Toast.makeText(UpdateProfileActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+                            updated[AVATAR_UPDATE] = true;
+                            dialog.dismiss();
+                        } else {
+                            Log.d(TAG, "Avatar URL update complete, but unsuccessful.");
+                            try {
+                                throw Objects.requireNonNull(task.getException());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Avatar updated failed.");
+                        e.printStackTrace();
+                    }
+                });
     }
 
-    public void updateProfileImageClick(View view) {
-        // TODO: Handle click event
+    public void updateAvatarClick(View view) {
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogLayout = inflater.inflate(R.layout.dialog_update_avatar, null);
+        final TextView titleView = dialogLayout.findViewById(R.id.update_dialog_title);
+        final ImageView imageView = dialogLayout.findViewById(R.id.update_dialog_imageView);
+        final TextInputLayout imageUrlLayout = dialogLayout.findViewById(R.id.update_dialog_profile_picture_url);
+        Button cancel = dialogLayout.findViewById(R.id.update_dialog_cancel);
+        Button select = dialogLayout.findViewById(R.id.update_dialog_select_image);
+        Button update = dialogLayout.findViewById(R.id.update_dialog_update);
+        Uri userUrl = user.getPhotoUrl();
+
+        titleView.setText(R.string.update_dialog_title_avatar);
+
+        // Set current user image
+        if (userUrl != null)
+            Utils.getImageAndPlaceInto(userUrl.toString(), imageView, IMAGE_SIZE_PX, this);
+
+        final AlertDialog dialog =  new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
+                .setView(dialogLayout)
+                .create();
+
+        cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Cancelling profile picture update.");
+                dialog.dismiss();
+            }
+        });
+
+        select.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Attempt to set image from URL.");
+                String imageUrl = Objects.requireNonNull(imageUrlLayout.getEditText()).getText().toString();
+
+                if (validateAvatarUrl(imageUrlLayout, imageUrl)) {
+                    Log.d(TAG, "Image URL successfully validated.");
+                    Utils.getImageAndPlaceInto(imageUrl, imageView, IMAGE_SIZE_PX, getBaseContext());
+                }
+            }
+        });
+
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Attempting to update Avatar URL.");
+                String imageUrl = Objects.requireNonNull(imageUrlLayout.getEditText()).getText().toString();
+
+                if (validateAvatarUrl(imageUrlLayout, imageUrl)) {
+                    updateAvatar(imageUrl, dialog);
+                }
+            }
+        });
+
+        dialog.show();
     }
 
 
@@ -88,7 +179,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         return true;
     }
 
-    private void updateDisplayName(String displayName) {
+    private void updateDisplayName(String displayName, final AlertDialog dialog) {
         UserProfileChangeRequest.Builder updates = new UserProfileChangeRequest.Builder();
         updates.setDisplayName(displayName);
         user.updateProfile(updates.build())
@@ -97,6 +188,9 @@ public class UpdateProfileActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Display name successfully updated.");
+                            Toast.makeText(UpdateProfileActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+                            updated[DISPLAY_UPDATE] = true;
+                            dialog.dismiss();
                         }
                     }
                 })
@@ -140,8 +234,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                 Log.d(TAG,"Attempting to update display name to " + displayName);
 
                 if (validateDisplayName(displayNameLayout, displayName)) {
-                    updateDisplayName(displayName);
-                    updated[DISPLAY_UPDATE] = true;
+                    updateDisplayName(displayName, dialog);
                 }
             }
         });
@@ -435,5 +528,29 @@ public class UpdateProfileActivity extends AppCompatActivity {
         intent.putExtra("updated", updated);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_LOAD_IMAGE) {
+            if (resultCode == RESULT_OK) {
+                Log.d(TAG, "Get image from device complete.");
+                assert data != null;
+                ImageView imageView = data.getParcelableExtra("imageView");
+
+                try {
+                    final Uri imageUri = data.getData();
+                    assert imageUri != null;
+                    final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                    final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                    imageView.setImageBitmap(selectedImage);
+                } catch (FileNotFoundException e) {
+                    Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

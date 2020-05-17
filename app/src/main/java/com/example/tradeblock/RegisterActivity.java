@@ -62,7 +62,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     private boolean validateDisplayName(String displayName) {
         Log.d(TAG, String.format("Validating username: %s", displayName));
-        // TODO: Check user database for duplicate display names
 
         if (displayName.length() == 0) {
             mDisplayNameLayout.setError("Please enter a display name.");

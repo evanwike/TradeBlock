@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.tradeblock.updateprofile.UpdateProfileActivity;
@@ -22,7 +23,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import static com.example.tradeblock.updateprofile.UpdateProfileActivity.PIC_UPDATE;
+import java.util.Objects;
+
+import static com.example.tradeblock.updateprofile.UpdateProfileActivity.AVATAR_UPDATE;
 import static com.example.tradeblock.updateprofile.UpdateProfileActivity.DISPLAY_UPDATE;
 import static com.example.tradeblock.updateprofile.UpdateProfileActivity.EMAIL_UPDATE;
 
@@ -30,8 +33,10 @@ import static com.example.tradeblock.updateprofile.UpdateProfileActivity.EMAIL_U
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static final int RC_UPDATE = 3;
+    public static final int IMAGE_SIZE_PX = 200;
     private AppBarConfiguration mAppBarConfiguration;
-    FirebaseUser user;
+    private FirebaseUser user;
+    private ImageView avatarView;
     private TextView displayNameView, emailView;
 
     @Override
@@ -49,12 +54,15 @@ public class MainActivity extends AppCompatActivity {
 
         // Set Header text
         View headerView = navigationView.getHeaderView(0);
+        avatarView = headerView.findViewById(R.id.drawerImage);
         displayNameView = headerView.findViewById(R.id.drawerUsername);
         emailView = headerView.findViewById(R.id.drawerEmail);
 
         assert user != null;
         displayNameView.setText(user.getDisplayName());
         emailView.setText(user.getEmail());
+        String url = Objects.requireNonNull(user.getPhotoUrl()).toString();
+        Utils.getImageAndPlaceInto(url, avatarView, IMAGE_SIZE_PX, this);
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -109,8 +117,10 @@ public class MainActivity extends AppCompatActivity {
     private void updateNavDrawerText(boolean[] updated) {
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        if (updated[PIC_UPDATE]) {
+        if (updated[AVATAR_UPDATE]) {
             Log.d(TAG, "Nav Drawer updated with new profile picture.");
+            String url = Objects.requireNonNull(user.getPhotoUrl()).toString();
+            Utils.getImageAndPlaceInto(url, avatarView, IMAGE_SIZE_PX, this);
         }
         if (updated[DISPLAY_UPDATE]) {
             Log.d(TAG, "Nav Drawer updated with new display name.");

@@ -33,7 +33,7 @@
     <string name="account_photo_uri">Image URL</string>
 
     <string name="update_title">Update Profile</string>
-    <string name="btn_update_image">Profile Pic</string>
+    <string name="btn_update_avatar">Avatar</string>
     <string name="btn_update_display">Display Name</string>
     <string name="btn_update_email">Email</string>
     <string name="btn_update_password">Password</string>
@@ -50,4 +50,9 @@
     <string name="update_dialog_hint">Update Value</string>
     <string name="update_current_password_hint">Current Password</string>
     <string name="update_email_hint">Email</string>
+    <string name="update_image_url_hint">Image URL</string>
+    <string name="btn_select">Select Image</string>
+    <string name="update_dialog_switch_label">From URL</string>
+    <string name="update_dialog_title_avatar">Update > Avatar</string>
+    <string name="user_avatar_description">User Avatar</string>
 </resources>
