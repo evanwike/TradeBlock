@@ -26,6 +26,8 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.util.Objects;
+
 public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
     public static final int MIN_PASSWORD_LENGTH = 8;
@@ -126,10 +128,17 @@ public class RegisterActivity extends AppCompatActivity {
                                         public void onComplete(@NonNull Task<Void> update) {
                                             if (update.isSuccessful()) {
                                                 Log.d(TAG, "Profile successfully updated.");
+                                                setResult(RESULT_OK);
+                                            } else {
+                                                Log.d(TAG, Objects.requireNonNull(update.getException()).getMessage());
                                             }
-
-                                            setResult(RESULT_OK);
                                             finish();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            e.printStackTrace();
                                         }
                                     });
                         }

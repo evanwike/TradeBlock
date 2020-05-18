@@ -86,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Add listener to logout button in navigation drawer
         logout.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {

@@ -1,15 +1,12 @@
 package com.example.tradeblock.updateprofile;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,8 +35,6 @@ import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Objects;
 
 import static com.example.tradeblock.MainActivity.IMAGE_SIZE_PX;
@@ -51,7 +46,6 @@ public class UpdateProfileActivity extends AppCompatActivity {
     public static final int AVATAR_UPDATE = 0;
     public static final int DISPLAY_UPDATE = 1;
     public static final int EMAIL_UPDATE = 2;
-    private static final int RC_LOAD_IMAGE = 4;
     private boolean[] updated;
     private FirebaseUser user;
 
@@ -126,7 +120,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         if (userUrl != null)
             Utils.getImageAndPlaceInto(userUrl.toString(), imageView, IMAGE_SIZE_PX, this);
 
-        final AlertDialog dialog =  new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
+        final AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
                 .setView(dialogLayout)
                 .create();
 
@@ -215,7 +209,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         displayNameLayout.setHint("Display Name");
         Objects.requireNonNull(displayNameLayout.getEditText()).setText(user.getDisplayName());
 
-        final AlertDialog dialog =  new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
+        final AlertDialog dialog = new MaterialAlertDialogBuilder(this, R.style.ThemeOverlay_MaterialComponents_Dialog)
                 .setView(dialogLayout)
                 .create();
 
@@ -231,7 +225,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String displayName = Objects.requireNonNull(displayNameLayout.getEditText()).getText().toString();
-                Log.d(TAG,"Attempting to update display name to " + displayName);
+                Log.d(TAG, "Attempting to update display name to " + displayName);
 
                 if (validateDisplayName(displayNameLayout, displayName)) {
                     updateDisplayName(displayName, dialog);
@@ -287,7 +281,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
                                                     Log.d(TAG, "User successfully re-authenticated.");
-                                                    updateEmail(email, dialog,passwordLayout);
+                                                    updateEmail(email, dialog, passwordLayout);
                                                 } else {
                                                     Log.d(TAG, "Re-authentication complete, but unsuccessful.");
                                                     Log.d(TAG, Objects.requireNonNull(task.getException()).getMessage());
@@ -329,7 +323,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG,"Cancelling email update.");
+                Log.d(TAG, "Cancelling email update.");
                 dialog.dismiss();
                 passwordLayout.setVisibility(View.INVISIBLE);
             }
@@ -339,7 +333,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String email = Objects.requireNonNull(emailLayout.getEditText()).getText().toString();
-                Log.d(TAG,"Attempting to update email to " + email);
+                Log.d(TAG, "Attempting to update email to " + email);
 
                 if (validateEmail(emailLayout, email)) {
                     Log.d(TAG, "New email successfully validated.");
@@ -386,6 +380,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                     }
                 });
     }
+
     @SuppressLint("RestrictedApi")
     private boolean validatePassword(TextInputLayout passwordLayout, String password) {
         clearError(passwordLayout);
@@ -424,7 +419,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG,"Password successfully updated.");
+                            Log.d(TAG, "Password successfully updated.");
                             dialog.dismiss();
                             Toast.makeText(UpdateProfileActivity.this, "Success!", Toast.LENGTH_SHORT).show();
                         }
@@ -494,7 +489,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG,"Cancelling password update.");
+                Log.d(TAG, "Cancelling password update.");
                 dialog.dismiss();
                 currentPasswordLayout.setVisibility(View.INVISIBLE);
             }
@@ -505,7 +500,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String password = Objects.requireNonNull(passwordLayout.getEditText()).getText().toString();
                 String confirmPassword = Objects.requireNonNull(confirmLayout.getEditText()).getText().toString();
-                Log.d(TAG,"Attempting to update password.");
+                Log.d(TAG, "Attempting to update password.");
 
                 if (validatePassword(passwordLayout, confirmLayout, password, confirmPassword)) {
                     Log.d(TAG, "Password successfully updated.");
@@ -528,29 +523,5 @@ public class UpdateProfileActivity extends AppCompatActivity {
         intent.putExtra("updated", updated);
         setResult(RESULT_OK, intent);
         finish();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_LOAD_IMAGE) {
-            if (resultCode == RESULT_OK) {
-                Log.d(TAG, "Get image from device complete.");
-                assert data != null;
-                ImageView imageView = data.getParcelableExtra("imageView");
-
-                try {
-                    final Uri imageUri = data.getData();
-                    assert imageUri != null;
-                    final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                    final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                    imageView.setImageBitmap(selectedImage);
-                } catch (FileNotFoundException e) {
-                    Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 }
